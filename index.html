@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>舊社國小六年級 - 智勇雙全學習冒險島</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Comic Neue -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            accent: '#f59e0b',
+                            purple: '#8b5cf6',
+                            emerald: '#10b981'
+                        }
+                    },
+                    fontFamily: {
+                        pop: ['"Mochiy Pop One"', 'sans-serif'],
+                        sans: ['Inter', 'Microsoft JhengHei', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #f3e8ff 100%);
+            min-height: 100vh;
+        }
+        .pop-font {
+            font-family: 'Mochiy Pop One', cursive, sans-serif;
+        }
+        .card-bounce {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-bounce:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .pulse-btn {
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.9); }
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(2, 132, 199, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(2, 132, 199, 0.6);
+        }
+    </style>
+</head>
+<body class="text-slate-800 pb-12">
+
+    <!-- Top Header / Active Student Banner -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-sky-100 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-sky-200">
+                    <i class="fa-solid fa-gamepad text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-800 leading-tight">舊社國小 六年級學習冒險島</h1>
+                    <p class="text-xs text-sky-600 font-semibold">113學年度 課後班專用版</p>
+                </div>
+            </div>
+
+            <!-- Active Student Quick Profile -->
+            <div id="active-student-bar" class="flex items-center space-x-3 bg-sky-50 px-3 py-1.5 rounded-full border border-sky-200">
+                <!-- JS dynamic injection -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <nav class="flex space-x-2 sm:space-x-4 border-b border-slate-200/80 pb-2 overflow-x-auto">
+            <button onclick="switchTab('game')" id="tab-btn-game" class="nav-tab flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-sky-500 text-white shadow-lg shadow-sky-200">
+                <i class="fa-solid fa-rocket"></i> 進入冒險挑戰
+            </button>
+            <button onclick="switchTab('students')" id="tab-btn-students" class="nav-tab flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-600 hover:bg-white/80">
+                <i class="fa-solid fa-users"></i> 學生英雄榜/管理
+            </button>
+            <button onclick="switchTab('leaderboard')" id="tab-btn-leaderboard" class="nav-tab flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-600 hover:bg-white/80">
+                <i class="fa-solid fa-trophy text-amber-500"></i> 排行榜
+            </button>
+            <button onclick="switchTab('teacher')" id="tab-btn-teacher" class="nav-tab flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-600 hover:bg-white/80">
+                <i class="fa-solid fa-chalkboard-user"></i> 教師後台
+            </button>
+        </nav>
+    </div>
+
+    <!-- Main Content Containers -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+
+        <!-- TAB 1: GAME & QUIZ SECTION -->
+        <section id="tab-content-game" class="tab-content space-y-6">
+            
+            <!-- Subject & Version Selection Area -->
+            <div id="game-setup-panel" class="bg-white/90 backdrop-blur rounded-3xl p-6 sm:p-8 shadow-xl border border-sky-100">
+                <div class="text-center max-w-2xl mx-auto mb-8">
+                    <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">舊社國小六年級專屬課程</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-2 pop-font">請選擇要挑戰的學科關卡</h2>
+                    <p class="text-slate-500 text-sm mt-1">選定學科與難度後即可開始闖關累積點數與等級！</p>
+                </div>
+
+                <!-- Subject Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+                    <!-- 國語 -->
+                    <div onclick="selectSubject('chinese')" id="subj-chinese" class="subject-card border-2 border-slate-100 hover:border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 cursor-pointer card-bounce transition-all relative overflow-hidden group">
+                        <div class="absolute -right-4 -bottom-4 text-amber-200/50 group-hover:text-amber-300/60 transition-colors">
+                            <i class="fa-solid fa-book-bookmark text-7xl"></i>
+                        </div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded">康軒版</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">國語領域</h3>
+                        <p class="text-xs text-slate-500">修辭法、成語接龍、古文字詞與閱讀理解</p>
+                    </div>
+
+                    <!-- 數學 -->
+                    <div onclick="selectSubject('math')" id="subj-math" class="subject-card border-2 border-slate-100 hover:border-sky-400 bg-gradient-to-br from-sky-50 to-blue-50 rounded-2xl p-5 cursor-pointer card-bounce transition-all relative overflow-hidden group">
+                        <div class="absolute -right-4 -bottom-4 text-sky-200/50 group-hover:text-sky-300/60 transition-colors">
+                            <i class="fa-solid fa-calculator text-7xl"></i>
+                        </div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs bg-sky-200 text-sky-900 font-bold px-2 py-0.5 rounded">翰林版</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">數學領域</h3>
+                        <p class="text-xs text-slate-500">比與比值、圓面積、速率換算、方程式</p>
+                    </div>
+
+                    <!-- 自然 -->
+                    <div onclick="selectSubject('science')" id="subj-science" class="subject-card border-2 border-slate-100 hover:border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 cursor-pointer card-bounce transition-all relative overflow-hidden group">
+                        <div class="absolute -right-4 -bottom-4 text-emerald-200/50 group-hover:text-emerald-300/60 transition-colors">
+                            <i class="fa-solid fa-flask-vial text-7xl"></i>
+                        </div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs bg-emerald-200 text-emerald-900 font-bold px-2 py-0.5 rounded">康軒版</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">自然領域</h3>
+                        <p class="text-xs text-slate-500">天氣變化與鋒面、電磁鐵、生態保育</p>
+                    </div>
+
+                    <!-- 社會 -->
+                    <div onclick="selectSubject('social')" id="subj-social" class="subject-card border-2 border-slate-100 hover:border-purple-400 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-5 cursor-pointer card-bounce transition-all relative overflow-hidden group">
+                        <div class="absolute -right-4 -bottom-4 text-purple-200/50 group-hover:text-purple-300/60 transition-colors">
+                            <i class="fa-solid fa-earth-americas text-7xl"></i>
+                        </div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs bg-purple-200 text-purple-900 font-bold px-2 py-0.5 rounded">翰林版</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">社會領域</h3>
+                        <p class="text-xs text-slate-500">世界文化、國際組織、科技與全球化</p>
+                    </div>
+
+                    <!-- 英語 -->
+                    <div onclick="selectSubject('english')" id="subj-english" class="subject-card border-2 border-slate-100 hover:border-rose-400 bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-5 cursor-pointer card-bounce transition-all relative overflow-hidden group">
+                        <div class="absolute -right-4 -bottom-4 text-rose-200/50 group-hover:text-rose-300/60 transition-colors">
+                            <i class="fa-solid fa-language text-7xl"></i>
+                        </div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs bg-rose-200 text-rose-900 font-bold px-2 py-0.5 rounded">通用高年級</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">英語領域</h3>
+                        <p class="text-xs text-slate-500">過去時態、最高級比較、日常生活對話</p>
+                    </div>
+                </div>
+
+                <!-- Difficulty & Mode Options -->
+                <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200/70">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">選擇難度等級：</label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button type="button" onclick="setDifficulty('easy')" id="diff-easy" class="diff-btn py-2.5 px-3 rounded-xl border-2 border-emerald-400 bg-emerald-50 text-emerald-800 font-bold text-center text-sm transition-all shadow-sm">
+                                    🌱 簡單<br><span class="text-xs font-normal">+10 EXP / 題</span>
+                                </button>
+                                <button type="button" onclick="setDifficulty('medium')" id="diff-medium" class="diff-btn py-2.5 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-center text-sm transition-all hover:border-amber-300">
+                                    ⚡ 中等<br><span class="text-xs font-normal">+20 EXP / 題</span>
+                                </button>
+                                <button type="button" onclick="setDifficulty('hard')" id="diff-hard" class="diff-btn py-2.5 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-center text-sm transition-all hover:border-rose-300">
+                                    🔥 挑戰<br><span class="text-xs font-normal">+35 EXP / 題</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">選擇考試範圍：</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button" onclick="setScope('midterm')" id="scope-midterm" class="scope-btn py-2.5 px-3 rounded-xl border-2 border-sky-400 bg-sky-50 text-sky-800 font-bold text-center text-xs transition-all shadow-sm">
+                                    🎯 期中考範圍<br><span class="text-[10px] font-normal opacity-80">(前半冊核心)</span>
+                                </button>
+                                <button type="button" onclick="setScope('final')" id="scope-final" class="scope-btn py-2.5 px-3 rounded-xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-center text-xs transition-all hover:border-indigo-300">
+                                    🏆 期末考範圍<br><span class="text-[10px] font-normal opacity-80">(後半冊進階)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <span class="text-sm font-bold text-slate-700">遊戲模式：</span>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="gameMode" value="standard" checked class="w-4 h-4 text-sky-600">
+                                <span class="ml-1.5 text-xs font-bold text-slate-700">標準闖關 (5題)</span>
+                            </label>
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="radio" name="gameMode" value="boss" class="w-4 h-4 text-amber-600">
+                                <span class="ml-1.5 text-xs font-bold text-slate-700">魔王限時計時賽 ⚡</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <button onclick="startQuiz()" class="pulse-btn bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:from-amber-600 hover:to-red-600 text-white pop-font text-xl px-10 py-4 rounded-2xl shadow-xl transition-all transform hover:scale-105 inline-flex items-center gap-3">
+                            <i class="fa-solid fa-play"></i> 開 始 答 題 冒 險
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Play Screen (Hidden by Default) -->
+            <div id="quiz-screen" class="hidden bg-white/95 backdrop-blur rounded-3xl p-6 sm:p-8 shadow-2xl border border-sky-100 relative overflow-hidden">
+                <!-- Quiz Header Info -->
+                <div class="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-6 gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span id="quiz-subject-badge" class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">國語 (康軒)</span>
+                        <span id="quiz-scope-badge" class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-bold">🎯 期中考</span>
+                        <span id="quiz-diff-badge" class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">簡單</span>
+                        <div class="flex items-center text-amber-500 font-extrabold text-sm gap-1 ml-2">
+                            <i class="fa-solid fa-fire text-lg"></i>
+                            <span id="combo-count">Combo x0</span>
+                        </div>
+                    </div>
+
+                    <!-- Timer Bar / Countdown -->
+                    <div id="timer-box" class="flex items-center gap-2 bg-slate-100 px-4 py-1.5 rounded-full font-mono text-sm font-bold text-slate-700">
+                        <i class="fa-regular fa-clock text-sky-600"></i>
+                        <span id="time-left">15</span> 秒
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-100 rounded-full h-2.5 mb-6 overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-2.5 rounded-full transition-all duration-300" style="width: 20%"></div>
+                </div>
+
+                <!-- Question Title -->
+                <div class="mb-8">
+                    <div class="text-xs font-bold text-sky-600 uppercase tracking-widest mb-1" id="question-number-text">QUESTION 1 / 5</div>
+                    <h3 id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800 leading-relaxed">題目載入中...</h3>
+                </div>
+
+                <!-- Multiple Choice Options -->
+                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                    <!-- Dynamic rendering of option buttons -->
+                </div>
+
+                <!-- Feedback Area -->
+                <div id="quiz-feedback" class="hidden p-4 rounded-2xl mb-4 text-center font-bold text-base transition-all"></div>
+
+                <!-- Action Footer -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                    <button onclick="confirmExitQuiz()" class="text-slate-400 hover:text-slate-600 text-sm font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> 放棄退出
+                    </button>
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-sky-500 hover:bg-sky-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-md transition-all">
+                        下一題 <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Result Modal / Screen -->
+            <div id="quiz-result-screen" class="hidden bg-white/95 backdrop-blur rounded-3xl p-8 shadow-2xl border border-sky-100 text-center max-w-xl mx-auto">
+                <div class="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-inner">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-slate-800 pop-font mb-2">闖關完成！</h2>
+                <p id="result-summary-text" class="text-slate-500 mb-6">太棒了，你展現了優秀的答題實力！</p>
+
+                <!-- Reward Badges -->
+                <div class="bg-gradient-to-r from-amber-50 via-sky-50 to-purple-50 rounded-2xl p-5 mb-6 border border-slate-100 text-left space-y-3">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600">答對題數：</span>
+                        <span id="result-score" class="font-extrabold text-slate-800 text-lg">4 / 5 題</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600">最高連續答對 (Combo)：</span>
+                        <span id="result-max-combo" class="font-extrabold text-amber-600 text-lg">3 次</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600">獲得經驗值 (EXP)：</span>
+                        <span id="result-exp-gained" class="font-extrabold text-emerald-600 text-lg">+80 EXP</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-slate-600">獲得點數 (Coins)：</span>
+                        <span id="result-coins-gained" class="font-extrabold text-indigo-600 text-lg">+40 點</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="resetGameSetup()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl transition-all">
+                        返回選單
+                    </button>
+                    <button onclick="startQuiz()" class="flex-1 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all">
+                        再玩一次 <i class="fa-solid fa-rotate-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- TAB 2: STUDENT MANAGEMENT & BATCH ADD -->
+        <section id="tab-content-students" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Batch Add Students Panel -->
+                <div class="bg-white/90 backdrop-blur rounded-3xl p-6 shadow-xl border border-sky-100 lg:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-user-plus text-sky-500 text-xl"></i>
+                        <h3 class="text-xl font-bold text-slate-800">快速一次新增多位學生</h3>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">
+                        貼上課後班學生名單（可以使用換行、逗號或空格分隔），即可一口氣匯入多名學生！
+                    </p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">學生姓名列表：</label>
+                            <textarea id="batch-student-input" rows="8" placeholder="例如：&#10;王小明&#10;陳大天&#10;李美美, 張哲偉&#10;許家豪" class="w-full p-3 text-sm rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-400 font-sans"></textarea>
+                        </div>
+
+                        <button onclick="handleBatchAddStudents()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 rounded-2xl shadow-lg shadow-sky-200 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-import"></i> 批次匯入學生名單
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Roster & Profiles List -->
+                <div class="bg-white/90 backdrop-blur rounded-3xl p-6 shadow-xl border border-sky-100 lg:col-span-2">
+                    <div class="flex flex-wrap items-center justify-between mb-6 gap-2">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">班級學生英雄名冊</h3>
+                            <p class="text-xs text-slate-500">選擇學生切換當前遊玩者，或檢視成就徽章</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="student-count-badge" class="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-1 rounded-full">共 0 位學生</span>
+                        </div>
+                    </div>
+
+                    <!-- Students Grid/List -->
+                    <div id="students-grid-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2">
+                        <!-- Dynamic Student Cards -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB 3: LEADERBOARD -->
+        <section id="tab-content-leaderboard" class="tab-content hidden space-y-6">
+            <div class="bg-white/90 backdrop-blur rounded-3xl p-6 sm:p-8 shadow-xl border border-sky-100 max-w-4xl mx-auto">
+                <div class="flex flex-wrap items-center justify-between mb-8 gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-slate-800 pop-font flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-500"></i> 六年級榮譽英雄榜
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">累積經驗值與期中／期末闖關積分，解鎖更高階頭銜！</p>
+                    </div>
+
+                    <!-- Sorting controls -->
+                    <div class="flex gap-1.5 bg-slate-100 p-1 rounded-xl">
+                        <button onclick="sortLeaderboard('exp')" id="sort-exp-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-sky-600 shadow-sm">總經驗值</button>
+                        <button onclick="sortLeaderboard('midterm')" id="sort-midterm-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-800">🎯 期中積分</button>
+                        <button onclick="sortLeaderboard('final')" id="sort-final-btn" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-800">🏆 期末積分</button>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Table/List -->
+                <div id="leaderboard-list" class="space-y-3">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: TEACHER ADMIN PANEL -->
+        <section id="tab-content-teacher" class="tab-content hidden space-y-6">
+            <div class="bg-white/90 backdrop-blur rounded-3xl p-6 sm:p-8 shadow-xl border border-sky-100">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <h2 class="text-2xl font-extrabold text-slate-800 pop-font flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-indigo-500"></i> 課後班教師管理後台
+                    </h2>
+                    <p class="text-xs text-slate-500">管理題目、分類考試範圍，或檢視學生學習數據</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Custom Question Addition -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                        <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-plus-circle text-sky-500"></i> 新增自訂課後練習題
+                        </h3>
+                        <form id="custom-question-form" onsubmit="handleAddCustomQuestion(event)" class="space-y-3">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1">科目領域</label>
+                                    <select id="custom-subj" class="w-full p-2.5 text-sm rounded-xl border border-slate-300">
+                                        <option value="chinese">國語 (康軒)</option>
+                                        <option value="math">數學 (翰林)</option>
+                                        <option value="science">自然 (康軒)</option>
+                                        <option value="social">社會 (翰林)</option>
+                                        <option value="english">英語 (通用)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1">考試範圍歸類</label>
+                                    <select id="custom-scope" class="w-full p-2.5 text-sm rounded-xl border border-slate-300">
+                                        <option value="midterm">🎯 期中考範圍</option>
+                                        <option value="final">🏆 期末考範圍</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">題目內容</label>
+                                <input type="text" id="custom-q-text" required placeholder="請輸入題目敘述" class="w-full p-2.5 text-sm rounded-xl border border-slate-300">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="custom-opt-0" required placeholder="選項 A (正確答案)" class="p-2 text-sm rounded-xl border border-emerald-300 bg-emerald-50/50">
+                                <input type="text" id="custom-opt-1" required placeholder="選項 B" class="p-2 text-sm rounded-xl border border-slate-300">
+                                <input type="text" id="custom-opt-2" required placeholder="選項 C" class="p-2 text-sm rounded-xl border border-slate-300">
+                                <input type="text" id="custom-opt-3" required placeholder="選項 D" class="p-2 text-sm rounded-xl border border-slate-300">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1">解析說明 (可選)</label>
+                                <input type="text" id="custom-explain" placeholder="答對或答錯時顯示的解答說明" class="w-full p-2.5 text-sm rounded-xl border border-slate-300">
+                            </div>
+                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl transition-all">
+                                儲存自訂題目
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- System Data Management -->
+                    <div class="space-y-6">
+                        <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200">
+                            <h3 class="font-bold text-amber-900 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-lightbulb"></i> 舊社國小各科版本與期中期末範圍
+                            </h3>
+                            <ul class="text-xs text-amber-800 space-y-1 list-disc list-inside">
+                                <li><b>國語 (康軒)</b>：期中（第1-7課成語句型）；期末（第8-14課文章理解）</li>
+                                <li><b>數學 (翰林)</b>：期中（質因數、分數除法、比值）；期末（圓面積、縮圖、速率）</li>
+                                <li><b>自然 (康軒)</b>：期中（天氣變化、鋒面）；期末（電磁鐵、生態保育）</li>
+                                <li><b>社會 (翰林)</b>：期中（臺灣地理歷史）；期末（科技發展、全球化）</li>
+                                <li><b>英語 (高年級)</b>：期中（進行式、過去式）；期末（最高級、情境對話）</li>
+                            </ul>
+                        </div>
+
+                        <!-- GitHub Pages Deployment Guide -->
+                        <div class="bg-slate-900 text-slate-100 p-5 rounded-2xl border border-slate-800 shadow-inner">
+                            <h3 class="font-bold text-amber-400 mb-2 flex items-center gap-2 text-sm">
+                                <i class="fa-brands fa-github text-lg"></i> GitHub Pages 網頁上線部署指南
+                            </h3>
+                            <ol class="text-xs text-slate-300 space-y-2 list-decimal list-inside">
+                                <li>於 GitHub 建立新公開儲存庫（Repository），名稱可設為 <code class="bg-slate-800 px-1 py-0.5 rounded text-sky-300">jiushe-learning</code>。</li>
+                                <li>點擊 <b>Add file</b> 選擇 <b>Upload files</b>，將本網頁檔案重新命名為 <code class="bg-slate-800 px-1 py-0.5 rounded text-amber-300">index.html</code> 後上傳。</li>
+                                <li>至 <b>Settings ➔ Pages</b>，將 Source 選擇為 <code class="bg-slate-800 px-1 py-0.5 rounded text-emerald-300">main</code> 分支並存檔。</li>
+                                <li>等待 1 分鐘即可取得給小朋友連線的專屬網址！</li>
+                            </ol>
+                        </div>
+
+                        <div class="bg-rose-50 p-5 rounded-2xl border border-rose-200">
+                            <h3 class="font-bold text-rose-800 mb-2 flex items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i> 系統重置區
+                            </h3>
+                            <p class="text-xs text-rose-600 mb-4">重置所有學生資料與分數（注意：此動作無法復原）</p>
+                            <button onclick="confirmResetAllData()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm px-4 py-2 rounded-xl transition-all">
+                                重置全班資料
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Custom Notification/Toast Box -->
+    <div id="toast-msg" class="fixed bottom-6 right-6 hidden bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-3 transition-all">
+        <i class="fa-solid fa-circle-info text-sky-400 text-lg"></i>
+        <span id="toast-text" class="text-sm font-bold">提示訊息</span>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        /* ==================== GLOBAL APP STATE & STORAGE ==================== */
+        const STORAGE_KEY = 'jiushe_g6_learning_portal_v2';
+
+        const LEVEL_TITLES = [
+            "學海新手", "知識冒險家", "答題小達人", "學科精英", 
+            "智慧大導師", "考場戰神", "終極學霸", "舊社榮譽傳奇"
+        ];
+
+        let appData = {
+            students: [],
+            activeStudentId: null,
+            customQuestions: []
+        };
+
+        let currentSubject = 'chinese';
+        let currentDifficulty = 'easy';
+        let currentExamScope = 'midterm'; // 'midterm' or 'final'
+        let currentSort = 'exp';
+
+        // Quiz session variables
+        let activeQuizQuestions = [];
+        let currentQIndex = 0;
+        let scoreCount = 0;
+        let comboCount = 0;
+        let maxCombo = 0;
+        let timerInterval = null;
+        let timeLeft = 15;
+        let isBossMode = false;
+        let hasAnsweredCurrentQ = false;
+
+        // Expanded Built-in Question Bank Classified by Scope (Midterm vs Final)
+        const builtInQuestions = {
+            chinese: {
+                midterm: [
+                    {
+                        q: "【期中考】「春風吹又生」這句詩句使用了哪一種修辭技巧？",
+                        options: ["擬人法", "轉化法", "對偶法", "夸飾法"],
+                        answer: 0,
+                        explain: "將春風吹拂擬人化為具有賦予生命的形象。"
+                    },
+                    {
+                        q: "【期中考】下列哪一個成語是用來形容「學問深厚且淵博」？",
+                        options: ["學富五車", "胸無點墨", "紙上談兵", "井底之蛙"],
+                        answer: 0,
+                        explain: "「學富五車」形容書讀得多，學問相當淵博。"
+                    },
+                    {
+                        q: "【期中考】康軒版六上國語：古文中「諸葛亮誡子書」強調的核心精神為何？",
+                        options: ["靜以修身，儉以養德", "金榜題名，光宗耀祖", "及時行樂，享受生活", "出將入相，追求功名"],
+                        answer: 0,
+                        explain: "誡子書核心在於「靜以修身，儉以養德，非淡泊無以明志」。"
+                    },
+                    {
+                        q: "【期中考】「這座山高得彷彿能碰到雲彩」使用了哪一種修辭法？",
+                        options: ["夸飾法", "譬喻法", "設問法", "排比法"],
+                        answer: 0,
+                        explain: "故意言過其實，將山的高聳誇大表達。"
+                    },
+                    {
+                        q: "【期中考】下列何者的意思是「做事持之以恆、不半途而廢」？",
+                        options: ["堅持不懈", "一鼓作氣", "三心二意", "淺嘗輒止"],
+                        answer: 0,
+                        explain: "「堅持不懈」指堅定到底，不鬆懈懈怠。"
+                    },
+                    {
+                        q: "【期中考】下列「」中的成語，何者使用最為恰當？",
+                        options: ["他練習寫字「持之以恆」，終於寫得一手好字", "這道菜的味道真是一敗塗地", "他在球場上表現得繪聲繪影", "這本書讀起來真是五光十色"],
+                        answer: 0,
+                        explain: "「持之以恆」常用來形容長久堅持做某件事。"
+                    }
+                ],
+                final: [
+                    {
+                        q: "【期末考】下列「」中的字音，何者前後完全相同？",
+                        options: ["「強」迫／「強」詞奪理", "「載」歌載舞／千「載」難逢", "「著」名／「著」急", "「數」見不鮮／「數」一數二"],
+                        answer: 0,
+                        explain: "「強」迫 (ㄑㄧㄤˇ) 與「強」詞奪理 (ㄑㄧㄤˇ) 讀音相同。"
+                    },
+                    {
+                        q: "【期末考】「縱使過程艱辛，他（ ）堅持到底不放棄。」括號中應填入何者？",
+                        options: ["依然", "竟然", "未免", "索性"],
+                        answer: 0,
+                        explain: "與「縱使」搭配表示轉折且持續堅持，使用「依然」。"
+                    },
+                    {
+                        q: "【期末考】康軒六上後半冊課文閱讀中，作者常透過抒情文傳達何種深層體悟？",
+                        options: ["感懷歲月與珍惜當下", "追求物質享樂", "抨擊社會不公", "讚賞軍事武功"],
+                        answer: 0,
+                        explain: "課文多強調情感抒發與人生價值的珍惜體悟。"
+                    },
+                    {
+                        q: "【期末考】「光陰似箭，日月如梭」是用來比喻什麼？",
+                        options: ["時間過得極快", "景色十分美麗", "心情非常愉快", "學問非常深厚"],
+                        answer: 0,
+                        explain: "比喻時間飛快流逝。"
+                    },
+                    {
+                        q: "【期末考】下列哪組詞語的意思最為接近？",
+                        options: ["兢兢業業／小心翼翼", "囫圇吞藻／細斟慢酌", "粗製濫造／精雕細琢", "名列前茅／名落孫山"],
+                        answer: 0,
+                        explain: "「兢兢業業」與「小心翼翼」皆有謹慎小心之意。"
+                    }
+                ]
+            },
+            math: {
+                midterm: [
+                    {
+                        q: "【期中考】若化簡比為 15 : 25，其最簡整數比與比值分別為何？",
+                        options: ["3 : 5，比值為 3/5", "5 : 3，比值為 5/3", "1 : 2，比值為 1/2", "3 : 5，比值為 5/3"],
+                        answer: 0,
+                        explain: "15:25 同除以 5 為 3:5，比值為 3 ÷ 5 = 3/5。"
+                    },
+                    {
+                        q: "【期中考】解方程式：5x + 10 = 35，則 x 的值為多少？",
+                        options: ["5", "6", "7", "8"],
+                        answer: 0,
+                        explain: "5x = 35 - 10 = 25，x = 25 ÷ 5 = 5。"
+                    },
+                    {
+                        q: "【期中考】計算 2/3 ÷ 4/5 的結果應為多少？",
+                        options: ["5/6", "8/15", "10/12", "6/5"],
+                        answer: 0,
+                        explain: "分數除法：乘以倒數，2/3 × 5/4 = 10/12 = 5/6。"
+                    },
+                    {
+                        q: "【期中考】求 12 和 18 的最大公因數是多少？",
+                        options: ["6", "3", "12", "36"],
+                        answer: 0,
+                        explain: "12 與 18 的因數中最大的共同數是 6。"
+                    },
+                    {
+                        q: "【期中考】若 4 : 7 = x : 21，則 x 的值是多少？",
+                        options: ["12", "14", "9", "16"],
+                        answer: 0,
+                        explain: "內項乘積等於外項乘積：7x = 4 × 21 = 84，x = 12。"
+                    },
+                    {
+                        q: "【期中考】將 0.8 化為最簡分數為多少？",
+                        options: ["4/5", "8/10", "2/5", "3/4"],
+                        answer: 0,
+                        explain: "0.8 = 8/10 = 4/5。"
+                    }
+                ],
+                final: [
+                    {
+                        q: "【期末考】翰林版六上數學：若圓的半徑為 10 公分，則其圓面積約為多少平方公分？(圓周率 3.14)",
+                        options: ["314 平方公分", "62.8 平方公分", "31.4 平方公分", "157 平方公分"],
+                        answer: 0,
+                        explain: "圓面積 = 半徑 × 半徑 × 圓周率 = 10 × 10 × 3.14 = 314。"
+                    },
+                    {
+                        q: "【期末考】小明騎腳踏車 2 小時行駛了 36 公里，請問他的平均時速是多少？",
+                        options: ["18 公里/小時", "36 公里/小時", "72 公里/小時", "12 公里/小時"],
+                        answer: 0,
+                        explain: "速率 = 距離 ÷ 時間 = 36 ÷ 2 = 18 (公里/小時)。"
+                    },
+                    {
+                        q: "【期末考】在一張 1 : 1000 的地圖上，長度 5 公分的道路實際長度是多少公尺？",
+                        options: ["50 公尺", "500 公尺", "5 公尺", "5000 公尺"],
+                        answer: 0,
+                        explain: "5 公分 × 1000 = 5000 公分 = 50 公尺。"
+                    },
+                    {
+                        q: "【期末考】半徑 5 公分的圓，其周長約為多少公分？(圓周率 3.14)",
+                        options: ["31.4 公分", "15.7 公分", "78.5 公分", "62.8 公分"],
+                        answer: 0,
+                        explain: "圓周長 = 直徑 × 圓周率 = 10 × 3.14 = 31.4 公分。"
+                    },
+                    {
+                        q: "【期末考】汽車以每小時 60 公里的速度行駛 2.5 小時，共行駛多少公里？",
+                        options: ["150 公里", "120 公里", "180 公里", "100 公里"],
+                        answer: 0,
+                        explain: "距離 = 速率 × 時間 = 60 × 2.5 = 150 公里。"
+                    }
+                ]
+            },
+            science: {
+                midterm: [
+                    {
+                        q: "【期中考】康軒版自然六上：當冷氣團與暖氣團勢力相當、互相僵持時，會形成哪一種鋒面？",
+                        options: ["滯留鋒", "冷鋒", "暖鋒", "囚錮鋒"],
+                        answer: 0,
+                        explain: "冷暖氣團勢力相當、移動緩慢時會形成滯留鋒（如梅雨季節）。"
+                    },
+                    {
+                        q: "【期中考】臺灣冬半季主要受哪一種季風影響，常帶來偏冷與東北部降雨？",
+                        options: ["東北季風", "西南季風", "東南季風", "西北季風"],
+                        answer: 0,
+                        explain: "臺灣冬天受蒙古高壓影響，盛行東北季風。"
+                    },
+                    {
+                        q: "【期中考】氣象預報中的「高氣壓」通常代表天氣狀況如何？",
+                        options: ["晴朗少雲", "陰雨連綿", "暴風雨狂吹", "降雪降霜"],
+                        answer: 0,
+                        explain: "高壓中心氣流下沉，不易形成雲雨，天氣通常較晴朗。"
+                    },
+                    {
+                        q: "【期中考】下列哪一種儀器主要用來測量空氣中的相對濕度？",
+                        options: ["乾濕球濕度計", "百葉箱氣溫計", "雨量計", "風向風速計"],
+                        answer: 0,
+                        explain: "乾濕球濕度計是用來測定空氣濕度的常見儀器。"
+                    }
+                ],
+                final: [
+                    {
+                        q: "【期末考】通電的螺線形線圈中插入下列哪一種物質，可以大幅增強其磁力？",
+                        options: ["鐵棒", "銅棒", "木棒", "塑膠棒"],
+                        answer: 0,
+                        explain: "鐵棒易被磁化，可顯著增強電磁鐵的磁場強度。"
+                    },
+                    {
+                        q: "【期末考】下列關於食物網與生態系保育的敘述，何者正確？",
+                        options: ["生物多樣性越高，生態系越穩定", "引進外來種可增加本地生物多樣性", "獵殺頂級掠食者不影響生態平衡", "大量使用農藥不影響土壤"],
+                        answer: 0,
+                        explain: "物種越豐富、食物網越複雜，生態系抵抗力越強。"
+                    },
+                    {
+                        q: "【期末考】改變下列哪一個因素，可以改變電磁鐵磁極的磁極方向？",
+                        options: ["改變電池的正負極方向", "增加電池數量", "增加線圈圈數", "使用更粗的導線"],
+                        answer: 0,
+                        explain: "改變電流方向（顛倒電池正負極）會改變電磁鐵的 N/S 磁極。"
+                    },
+                    {
+                        q: "【期末考】下列何者屬於生態系中的「分解者」？",
+                        options: ["蕈類與真菌", "綠色植物", "草食性昆蟲", "肉食性動物"],
+                        answer: 0,
+                        explain: "真菌與細菌能分解動植物屍體與排泄物，屬於分解者。"
+                    }
+                ]
+            },
+            social: {
+                midterm: [
+                    {
+                        q: "【期中考】臺灣地形豐富多樣，中央山脈主要呈現何種走向？",
+                        options: ["南北走向", "東西走向", "東北—西南走向", "西北—東南走向"],
+                        answer: 0,
+                        explain: "臺灣造山運動形成東北至西南／南北走向之山脈結構。"
+                    },
+                    {
+                        q: "【期中考】台灣的新竹科學園區以哪一項產業聞名全球？",
+                        options: ["半導體與高科技產業", "重工業與造船", "傳統紡織業", "農業加工"],
+                        answer: 0,
+                        explain: "新竹科學園區是台灣半導體與高科技產業的重要重鎮。"
+                    },
+                    {
+                        q: "【期中考】下列何者是台灣平原地形中面積最大、農業最發達的平原？",
+                        options: ["嘉南平原", "屏東平原", "宜蘭平原", "彰化平原"],
+                        answer: 0,
+                        explain: "嘉南平原是台灣面積最大的平原，為重要穀倉。"
+                    }
+                ],
+                final: [
+                    {
+                        q: "【期末考】翰林版社會六上：總部設於美國紐約，旨在維護世界和平與安全的國際組織是？",
+                        options: ["聯合國 (UN)", "世界貿易組織 (WTO)", "亞太經濟合作會議 (APEC)", "國際紅十字會"],
+                        answer: 0,
+                        explain: "聯合國 (United Nations) 是維護全球和平安全的主要國際組織。"
+                    },
+                    {
+                        q: "【期末考】全球化趨勢下，各國經濟與文化交流日益頻繁，這種現象稱為？",
+                        options: ["地球村", "閉關自守", "地方化", "孤立主義"],
+                        answer: 0,
+                        explain: "交通與通訊發達使全球連結密切，宛如住在同一個地球村。"
+                    },
+                    {
+                        q: "【期末考】旨在推動全球貿易自由化與減少關稅障礙的國際組織是？",
+                        options: ["世界貿易組織 (WTO)", "聯合國 (UN)", "國際奧委會 (IOC)", "綠色和平組織"],
+                        answer: 0,
+                        explain: "WTO 致力於促進全球貿易開放與解決貿易爭端。"
+                    }
+                ]
+            },
+            english: {
+                midterm: [
+                    {
+                        q: "【Midterm】Choose the correct past tense: 'Yesterday, Kevin _____ his homework before playing games.'",
+                        options: ["finished", "finishes", "finish", "is finishing"],
+                        answer: 0,
+                        explain: "Yesterday 時間詞表示過去發生的動作，動詞要用過去式 finished。"
+                    },
+                    {
+                        q: "【Midterm】Complete the sentence: 'A: Where _____ you go last weekend? B: I went to Hsinchu.'",
+                        options: ["did", "do", "are", "were"],
+                        answer: 0,
+                        explain: "詢問過去發生的事情，助動詞使用 did。"
+                    },
+                    {
+                        q: "【Midterm】'My sister _____ to the library every Saturday.' Which form is correct?",
+                        options: ["goes", "go", "went", "is going"],
+                        answer: 0,
+                        explain: "every Saturday 表示習慣性動作，第三人稱單數使用 goes。"
+                    }
+                ],
+                final: [
+                    {
+                        q: "【Final】Which one is the superlative form? 'Mount Everest is the _____ mountain in the world.'",
+                        options: ["highest", "higher", "high", "more high"],
+                        answer: 0,
+                        explain: "最高級使用 the highest。"
+                    },
+                    {
+                        q: "【Final】Select the correct word: 'Look! The students _____ basketball on the playground now.'",
+                        options: ["are playing", "played", "play", "plays"],
+                        answer: 0,
+                        explain: "提示詞 Look! 與 now 表示現在進行式 (be + V-ing)。"
+                    },
+                    {
+                        q: "【Final】'This box is _____ than that one.' Fill in the blank.",
+                        options: ["heavier", "heaviest", "heavy", "more heavy"],
+                        answer: 0,
+                        explain: "與 than 搭配使用比較級，heavy 的比較級為 heavier。"
+                    }
+                ]
+            }
+        };
+
+        /* ==================== CORE NAVIGATION & UI ==================== */
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.className = 'nav-tab flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-600 hover:bg-white/80';
+            });
+
+            const activeContent = document.getElementById(`tab-content-${tabId}`);
+            if (activeContent) activeContent.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = 'nav-tab flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-sky-500 text-white shadow-lg shadow-sky-200';
+            }
+
+            if (tabId === 'leaderboard') renderLeaderboard();
+            if (tabId === 'students') renderStudentsGrid();
+        }
+
+        function selectSubject(subjKey) {
+            currentSubject = subjKey;
+            document.querySelectorAll('.subject-card').forEach(card => {
+                card.classList.remove('ring-4', 'ring-sky-400', 'shadow-xl');
+            });
+            const activeCard = document.getElementById(`subj-${subjKey}`);
+            if (activeCard) {
+                activeCard.classList.add('ring-4', 'ring-sky-400', 'shadow-xl');
+            }
+        }
+
+        function setDifficulty(diff) {
+            currentDifficulty = diff;
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.remove('border-emerald-400', 'bg-emerald-50', 'text-emerald-800', 'border-amber-400', 'bg-amber-50', 'text-amber-800', 'border-rose-400', 'bg-rose-50', 'text-rose-800');
+                btn.classList.add('border-slate-200', 'bg-white', 'text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`diff-${diff}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-slate-200', 'bg-white', 'text-slate-600');
+                if (diff === 'easy') activeBtn.classList.add('border-emerald-400', 'bg-emerald-50', 'text-emerald-800');
+                if (diff === 'medium') activeBtn.classList.add('border-amber-400', 'bg-amber-50', 'text-amber-800');
+                if (diff === 'hard') activeBtn.classList.add('border-rose-400', 'bg-rose-50', 'text-rose-800');
+            }
+        }
+
+        function setScope(scope) {
+            currentExamScope = scope;
+            document.querySelectorAll('.scope-btn').forEach(btn => {
+                btn.classList.remove('border-sky-400', 'bg-sky-50', 'text-sky-800', 'border-indigo-400', 'bg-indigo-50', 'text-indigo-800');
+                btn.classList.add('border-slate-200', 'bg-white', 'text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`scope-${scope}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-slate-200', 'bg-white', 'text-slate-600');
+                if (scope === 'midterm') activeBtn.classList.add('border-sky-400', 'bg-sky-50', 'text-sky-800');
+                if (scope === 'final') activeBtn.classList.add('border-indigo-400', 'bg-indigo-50', 'text-indigo-800');
+            }
+        }
+
+        /* ==================== DATA & STORAGE LOGIC ==================== */
+        function loadData() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try {
+                    appData = JSON.parse(raw);
+                } catch(e) {
+                    console.error("Storage parse error", e);
+                }
+            }
+            if (!appData.students || appData.students.length === 0) {
+                initDefaultStudents();
+            } else {
+                renderActiveStudentBar();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            renderActiveStudentBar();
+            renderStudentsGrid();
+        }
+
+        function initDefaultStudents() {
+            const defaults = ["王小明", "陳品妍", "林宇翔", "張千羽"];
+            defaults.forEach((name, idx) => {
+                appData.students.push({
+                    id: 'std_' + Date.now() + '_' + idx,
+                    name: name,
+                    exp: (3 - idx) * 40,
+                    coins: (3 - idx) * 20,
+                    level: 1,
+                    midtermScore: (3 - idx) * 15,
+                    finalScore: (3 - idx) * 10,
+                    badges: ["新手上路"]
+                });
+            });
+            appData.activeStudentId = appData.students[0].id;
+            saveData();
+        }
+
+        function getActiveStudent() {
+            return appData.students.find(s => s.id === appData.activeStudentId) || appData.students[0];
+        }
+
+        function setActiveStudent(id) {
+            appData.activeStudentId = id;
+            saveData();
+            showToast(`已切換目前闖關者為：${getActiveStudent()?.name}`);
+        }
+
+        function renderActiveStudentBar() {
+            const bar = document.getElementById('active-student-bar');
+            const student = getActiveStudent();
+            if (!student) {
+                bar.innerHTML = `<span class="text-xs font-bold text-slate-500">請新增學生</span>`;
+                return;
+            }
+
+            const titleIndex = Math.min(student.level - 1, LEVEL_TITLES.length - 1);
+            bar.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-sky-500 text-white font-bold text-xs flex items-center justify-center">
+                        ${student.name.charAt(0)}
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-bold text-slate-800 text-xs sm:text-sm">${student.name}</span>
+                            <span class="text-[10px] bg-amber-400 text-amber-950 font-extrabold px-1.5 rounded-full">Lvl.${student.level}</span>
+                        </div>
+                        <p class="text-[10px] text-sky-700 font-medium">${LEVEL_TITLES[titleIndex]} (${student.exp} EXP)</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStudentsGrid() {
+            const container = document.getElementById('students-grid-container');
+            const badgeCount = document.getElementById('student-count-badge');
+            if (badgeCount) badgeCount.innerText = `共 ${appData.students.length} 位學生`;
+
+            container.innerHTML = '';
+            appData.students.forEach(s => {
+                const isActive = s.id === appData.activeStudentId;
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border-2 transition-all flex flex-col justify-between ${
+                    isActive ? 'border-sky-400 bg-sky-50/50 shadow-md' : 'border-slate-100 bg-white hover:border-slate-200'
+                }`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold text-sm flex items-center justify-center">
+                                    ${s.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">${s.name}</h4>
+                                    <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">Level ${s.level}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                ${
+                                    isActive 
+                                    ? `<span class="text-[10px] bg-sky-500 text-white font-bold px-2 py-0.5 rounded-full">當前遊玩</span>` 
+                                    : `<button onclick="setActiveStudent('${s.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1 rounded-lg">選擇</button>`
+                                }
+                                <button onclick="deleteStudent('${s.id}')" class="text-xs text-rose-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition-colors" title="刪除學生">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2 rounded-xl my-2">
+                            <div><span class="text-slate-400">EXP：</span><b class="text-amber-600">${s.exp}</b></div>
+                            <div><span class="text-slate-400">點數：</span><b class="text-indigo-600">${s.coins}</b></div>
+                            <div><span class="text-slate-400">期中：</span><b class="text-sky-600">${s.midtermScore || 0}分</b></div>
+                            <div><span class="text-slate-400">期末：</span><b class="text-emerald-600">${s.finalScore || 0}分</b></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 overflow-x-auto pt-1">
+                        ${(s.badges || []).map(b => `<span class="text-[10px] bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">🏅 ${b}</span>`).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteStudent(id) {
+            const student = appData.students.find(s => s.id === id);
+            if (!student) return;
+
+            if (confirm(`確定要刪除學生「${student.name}」嗎？刪除後學習紀錄將無法復原。`)) {
+                appData.students = appData.students.filter(s => s.id !== id);
+                if (appData.activeStudentId === id) {
+                    appData.activeStudentId = appData.students.length > 0 ? appData.students[0].id : null;
+                }
+                saveData();
+                showToast(`已成功刪除學生：${student.name}`);
+            }
+        }
+
+        function handleBatchAddStudents() {
+            const input = document.getElementById('batch-student-input');
+            const rawText = input.value.trim();
+            if (!rawText) {
+                showToast("請輸入學生姓名名單！");
+                return;
+            }
+
+            const names = rawText.split(/[\n,，\s]+/).filter(n => n.trim().length > 0);
+            let addedCount = 0;
+
+            names.forEach(name => {
+                const cleanName = name.trim();
+                if (!appData.students.some(s => s.name === cleanName)) {
+                    appData.students.push({
+                        id: 'std_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                        name: cleanName,
+                        exp: 0,
+                        coins: 0,
+                        level: 1,
+                        midtermScore: 0,
+                        finalScore: 0,
+                        badges: ["新手上路"]
+                    });
+                    addedCount++;
+                }
+            });
+
+            if (!appData.activeStudentId && appData.students.length > 0) {
+                appData.activeStudentId = appData.students[0].id;
+            }
+
+            saveData();
+            input.value = '';
+            showToast(`成功匯入 ${addedCount} 位新學生！`);
+        }
+
+        /* ==================== LEADERBOARD LOGIC ==================== */
+        function sortLeaderboard(sortType) {
+            currentSort = sortType;
+            document.querySelectorAll('#sort-exp-btn, #sort-midterm-btn, #sort-final-btn').forEach(btn => {
+                btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-800';
+            });
+
+            const activeBtn = document.getElementById(`sort-${sortType}-btn`);
+            if (activeBtn) activeBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-sky-600 shadow-sm';
+
+            renderLeaderboard();
+        }
+
+        function renderLeaderboard() {
+            const list = document.getElementById('leaderboard-list');
+            if (!list) return;
+
+            let sorted = [...appData.students];
+            if (currentSort === 'exp') sorted.sort((a,b) => b.exp - a.exp);
+            if (currentSort === 'midterm') sorted.sort((a,b) => (b.midtermScore || 0) - (a.midtermScore || 0));
+            if (currentSort === 'final') sorted.sort((a,b) => (b.finalScore || 0) - (a.finalScore || 0));
+
+            list.innerHTML = '';
+            sorted.forEach((std, rank) => {
+                let rankBadge = `<span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">${rank + 1}</span>`;
+                if (rank === 0) rankBadge = `<span class="w-7 h-7 rounded-full bg-amber-400 text-amber-950 font-extrabold text-sm flex items-center justify-center shadow-md">🥇</span>`;
+                if (rank === 1) rankBadge = `<span class="w-7 h-7 rounded-full bg-slate-300 text-slate-800 font-extrabold text-sm flex items-center justify-center shadow-md">🥈</span>`;
+                if (rank === 2) rankBadge = `<span class="w-7 h-7 rounded-full bg-amber-600 text-white font-extrabold text-sm flex items-center justify-center shadow-md">🥉</span>`;
+
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-3.5 bg-slate-50 hover:bg-sky-50/60 rounded-2xl border border-slate-100 transition-colors';
+                
+                let scoreDisplay = `<span class="font-bold text-amber-600 text-sm">${std.exp} <span class="text-[10px] text-slate-400">EXP</span></span>`;
+                if (currentSort === 'midterm') scoreDisplay = `<span class="font-bold text-sky-600 text-sm">${std.midtermScore || 0} <span class="text-[10px] text-slate-400">期中分</span></span>`;
+                if (currentSort === 'final') scoreDisplay = `<span class="font-bold text-indigo-600 text-sm">${std.finalScore || 0} <span class="text-[10px] text-slate-400">期末分</span></span>`;
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        ${rankBadge}
+                        <div class="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold text-xs flex items-center justify-center">
+                            ${std.name.charAt(0)}
+                        </div>
+                        <div>
+                            <span class="font-bold text-slate-800 text-sm">${std.name}</span>
+                            <span class="ml-2 text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">Lvl.${std.level}</span>
+                        </div>
+                    </div>
+                    <div>${scoreDisplay}</div>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        /* ==================== QUIZ GAME ENGINE ==================== */
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startQuiz() {
+            const student = getActiveStudent();
+            if (!student) {
+                showToast("請先新增並選擇一位學生！");
+                switchTab('students');
+                return;
+            }
+
+            const rawBuiltIn = builtInQuestions[currentSubject]?.[currentExamScope] || [];
+            const customForSubj = (appData.customQuestions || []).filter(
+                q => q.subject === currentSubject && q.scope === currentExamScope
+            );
+
+            let combinedPool = [...rawBuiltIn, ...customForSubj];
+            if (combinedPool.length === 0) {
+                showToast("該科目目前尚無此考試範圍的題目，已載入備用題目！");
+                combinedPool = builtInQuestions.chinese.midterm;
+            }
+
+            const shuffledPool = shuffleArray(combinedPool);
+            const selectedRawQuestions = shuffledPool.slice(0, 5);
+
+            activeQuizQuestions = selectedRawQuestions.map(qObj => {
+                const originalOptions = qObj.options.map((optText, idx) => ({
+                    text: optText,
+                    isCorrect: idx === qObj.answer
+                }));
+                const shuffledOpts = shuffleArray(originalOptions);
+                const newCorrectIndex = shuffledOpts.findIndex(o => o.isCorrect);
+
+                return {
+                    q: qObj.q,
+                    options: shuffledOpts.map(o => o.text),
+                    answer: newCorrectIndex,
+                    explain: qObj.explain || "答對了！繼續保持！"
+                };
+            });
+
+            currentQIndex = 0;
+            scoreCount = 0;
+            comboCount = 0;
+            maxCombo = 0;
+
+            const selectedMode = document.querySelector('input[name="gameMode"]:checked')?.value || 'standard';
+            isBossMode = selectedMode === 'boss';
+
+            document.getElementById('game-setup-panel').classList.add('hidden');
+            document.getElementById('quiz-result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            hasAnsweredCurrentQ = false;
+            clearInterval(timerInterval);
+
+            const qData = activeQuizQuestions[currentQIndex];
+            const totalQ = activeQuizQuestions.length;
+
+            document.getElementById('question-number-text').innerText = `QUESTION ${currentQIndex + 1} / ${totalQ}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((currentQIndex + 1) / totalQ) * 100}%`;
+            document.getElementById('question-text').innerText = qData.q;
+
+            const subjBadge = document.getElementById('quiz-subject-badge');
+            const scopeBadge = document.getElementById('quiz-scope-badge');
+            const diffBadge = document.getElementById('quiz-diff-badge');
+
+            const subjMap = { chinese:'國語 (康軒)', math:'數學 (翰林)', science:'自然 (康軒)', social:'社會 (翰林)', english:'英語 (通用)' };
+            subjBadge.innerText = subjMap[currentSubject] || '通用';
+            scopeBadge.innerText = currentExamScope === 'midterm' ? '🎯 期中考' : '🏆 期末考';
+            diffBadge.innerText = currentDifficulty === 'easy' ? '🌱 簡單' : (currentDifficulty === 'medium' ? '⚡ 中等' : '🔥 挑戰');
+
+            document.getElementById('combo-count').innerText = `Combo x${comboCount}`;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            const labels = ['A', 'B', 'C', 'D'];
+
+            qData.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn border-2 border-slate-200 hover:border-sky-400 bg-white p-4 rounded-2xl text-left font-bold text-slate-700 transition-all flex items-center gap-3 hover:shadow-md';
+                btn.onclick = () => handleAnswer(idx);
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center shrink-0">${labels[idx]}</span>
+                    <span class="text-sm leading-snug">${optText}</span>
+                `;
+                container.appendChild(btn);
+            });
+
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+
+            timeLeft = isBossMode ? 8 : 15;
+            document.getElementById('time-left').innerText = timeLeft;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time-left').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (!hasAnsweredCurrentQ) handleAnswer(-1); // Timeout
+                }
+            }, 1000);
+        }
+
+        function handleAnswer(selectedIndex) {
+            if (hasAnsweredCurrentQ) return;
+            hasAnsweredCurrentQ = true;
+            clearInterval(timerInterval);
+
+            const qData = activeQuizQuestions[currentQIndex];
+            const isCorrect = selectedIndex === qData.answer;
+            const feedbackEl = document.getElementById('quiz-feedback');
+            const optionBtns = document.querySelectorAll('.option-btn');
+
+            optionBtns.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === qData.answer) {
+                    btn.className = 'option-btn border-2 border-emerald-500 bg-emerald-50 p-4 rounded-2xl text-left font-bold text-emerald-900 flex items-center gap-3';
+                } else if (idx === selectedIndex) {
+                    btn.className = 'option-btn border-2 border-rose-500 bg-rose-50 p-4 rounded-2xl text-left font-bold text-rose-900 flex items-center gap-3';
+                } else {
+                    btn.className = 'option-btn border-2 border-slate-100 bg-slate-50/50 p-4 rounded-2xl text-left font-bold text-slate-400 flex items-center gap-3 opacity-60';
+                }
+            });
+
+            if (isCorrect) {
+                scoreCount++;
+                comboCount++;
+                if (comboCount > maxCombo) maxCombo = comboCount;
+                playSound('correct');
+
+                feedbackEl.className = 'p-4 rounded-2xl mb-4 text-center font-bold text-sm bg-emerald-100 text-emerald-900 border border-emerald-300';
+                feedbackEl.innerHTML = `<i class="fa-solid fa-circle-check text-lg mr-1 text-emerald-600"></i> 太棒了！答對了！ ${qData.explain}`;
+            } else {
+                comboCount = 0;
+                playSound('wrong');
+
+                feedbackEl.className = 'p-4 rounded-2xl mb-4 text-center font-bold text-sm bg-rose-100 text-rose-900 border border-rose-300';
+                feedbackEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-lg mr-1 text-rose-600"></i> ${selectedIndex === -1 ? '時間到！' : '答錯囉！'} ${qData.explain}`;
+            }
+
+            document.getElementById('combo-count').innerText = `Combo x${comboCount}`;
+            feedbackEl.classList.remove('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQIndex++;
+            if (currentQIndex < activeQuizQuestions.length) {
+                renderQuestion();
+            } else {
+                finishQuizSession();
+            }
+        }
+
+        function finishQuizSession() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('quiz-result-screen').classList.remove('hidden');
+
+            const student = getActiveStudent();
+            let baseExp = currentDifficulty === 'easy' ? 10 : (currentDifficulty === 'medium' ? 20 : 35);
+            let earnedExp = scoreCount * baseExp + (maxCombo * 5);
+            let earnedCoins = scoreCount * 10;
+
+            student.exp += earnedExp;
+            student.coins += earnedCoins;
+
+            const examPoints = scoreCount * 20;
+            if (currentExamScope === 'midterm') {
+                student.midtermScore = (student.midtermScore || 0) + examPoints;
+            } else {
+                student.finalScore = (student.finalScore || 0) + examPoints;
+            }
+
+            const newLevel = Math.floor(student.exp / 100) + 1;
+            if (newLevel > student.level) {
+                student.level = newLevel;
+                showToast(`🎉 恭喜！${student.name} 升級到了 Level ${newLevel}！`);
+            }
+
+            saveData();
+
+            document.getElementById('result-score').innerText = `${scoreCount} / ${activeQuizQuestions.length} 題`;
+            document.getElementById('result-max-combo').innerText = `${maxCombo} 次`;
+            document.getElementById('result-exp-gained').innerText = `+${earnedExp} EXP`;
+            document.getElementById('result-coins-gained').innerText = `+${earnedCoins} 點`;
+
+            if (scoreCount >= 4 && typeof confetti === 'function') {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+
+        function resetGameSetup() {
+            document.getElementById('quiz-result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('game-setup-panel').classList.remove('hidden');
+        }
+
+        function confirmExitQuiz() {
+            if (confirm("確定要放棄這次答題冒險嗎？目前的進度將不被保存。")) {
+                clearInterval(timerInterval);
+                resetGameSetup();
+            }
+        }
+
+        /* ==================== TEACHER ADMIN LOGIC ==================== */
+        function handleAddCustomQuestion(e) {
+            e.preventDefault();
+            const subj = document.getElementById('custom-subj').value;
+            const scope = document.getElementById('custom-scope').value;
+            const qText = document.getElementById('custom-q-text').value.trim();
+            const opt0 = document.getElementById('custom-opt-0').value.trim();
+            const opt1 = document.getElementById('custom-opt-1').value.trim();
+            const opt2 = document.getElementById('custom-opt-2').value.trim();
+            const opt3 = document.getElementById('custom-opt-3').value.trim();
+            const explain = document.getElementById('custom-explain').value.trim();
+
+            if (!qText || !opt0 || !opt1) return;
+
+            if (!appData.customQuestions) appData.customQuestions = [];
+
+            appData.customQuestions.push({
+                subject: subj,
+                scope: scope,
+                q: qText,
+                options: [opt0, opt1, opt2, opt3],
+                answer: 0,
+                explain: explain || "自訂題目的解答說明"
+            });
+
+            saveData();
+            document.getElementById('custom-question-form').reset();
+            showToast("成功新增 1 題自訂練習題！");
+        }
+
+        function confirmResetAllData() {
+            if (confirm("⚠️ 警告：確定要清除全班資料與成績嗎？這將會重置所有學生的積分。")) {
+                localStorage.removeItem(STORAGE_KEY);
+                appData = { students: [], activeStudentId: null, customQuestions: [] };
+                initDefaultStudents();
+                showToast("已成功重置全班資料！");
+            }
+        }
+
+        /* ==================== UTILITY FUNCTIONS ==================== */
+        function showToast(msg) {
+            const toast = document.getElementById('toast-msg');
+            const text = document.getElementById('toast-text');
+            text.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => { toast.classList.add('hidden'); }, 3000);
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.25);
+                } else {
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.setValueAtTime(164.81, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.25);
+                }
+            } catch(e) {}
+        }
+
+        /* ==================== INITIALIZATION ==================== */
+        window.onload = function() {
+            loadData();
+            selectSubject('chinese');
+            setDifficulty('easy');
+            setScope('midterm');
+        };
+    </script>
+</body>
+</html>
