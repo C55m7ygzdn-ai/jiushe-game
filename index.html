@@ -532,7 +532,8 @@
         let appData = {
             students: [],
             activeStudentId: null,
-            customQuestions: []
+            customQuestions: [],
+            askedQuestionIds: [] // 新增：紀錄全班最近出現過的題目ID，避免重複
         };
 
         let currentSubject = 'chinese';
@@ -551,585 +552,98 @@
         let isBossMode = false;
         let hasAnsweredCurrentQ = false;
 
-        // Expanded Built-in Question Bank Classified by Scope (Midterm vs Final)
+        // 大幅擴充舊社國小各科期中、期末考題庫 (附帶獨立 id)
         const builtInQuestions = {
             chinese: {
                 midterm: [
-                    {
-                        q: "【期中考】「春風吹又生」這句詩句使用了哪一種修辭技巧？",
-                        options: ["擬人法", "轉化法", "對偶法", "夸飾法"],
-                        answer: 0,
-                        explain: "將春風吹拂擬人化為具有賦予生命的形象。"
-                    },
-                    {
-                        q: "【期中考】下列哪一個成語是用來形容「學問深厚且淵博」？",
-                        options: ["學富五車", "胸無點墨", "紙上談兵", "井底之蛙"],
-                        answer: 0,
-                        explain: "「學富五車」形容書讀得多，學問相當淵博。"
-                    },
-                    {
-                        q: "【期中考】康軒版六上國語：古文中「諸葛亮誡子書」強調的核心精神為何？",
-                        options: ["靜以修身，儉以養德", "金榜題名，光宗耀祖", "及時行樂，享受生活", "出將入相，追求功名"],
-                        answer: 0,
-                        explain: "誡子書核心在於「靜以修身，儉以養德，非淡泊無以明志」。"
-                    },
-                    {
-                        q: "【期中考】「這座山高得彷彿能碰到雲彩」使用了哪一種修辭法？",
-                        options: ["夸飾法", "譬喻法", "設問法", "排比法"],
-                        answer: 0,
-                        explain: "故意言過其實，將山的高聳誇大表達。"
-                    },
-                    {
-                        q: "【期中考】下列何者的意思是「做事持之以恆、不半途而廢」？",
-                        options: ["堅持不懈", "一鼓作氣", "三心二意", "淺嘗輒止"],
-                        answer: 0,
-                        explain: "「堅持不懈」指堅定到底，不鬆懈懈怠。"
-                    },
-                    {
-                        q: "【期中考】下列「」中的成語，何者使用最為恰當？",
-                        options: ["他練習寫字「持之以恆」，終於寫得一手好字", "這道菜的味道真是一敗塗地", "他在球場上表現得繪聲繪影", "這本書讀起來真是五光十色"],
-                        answer: 0,
-                        explain: "「持之以恆」常用來形容長久堅持做某件事。"
-                    }
+                    { id: 'c_m_1', q: "【期中考】「春風吹又生」這句詩句使用了哪一種修辭技巧？", options: ["擬人法", "轉化法", "對偶法", "夸飾法"], answer: 0, explain: "將春風吹拂擬人化為具有賦予生命的形象。" },
+                    { id: 'c_m_2', q: "【期中考】下列哪一個成語是用來形容「學問深厚且淵博」？", options: ["學富五車", "胸無點墨", "紙上談兵", "井底之蛙"], answer: 0, explain: "「學富五車」形容書讀得多，學問相當淵博。" },
+                    { id: 'c_m_3', q: "【期中考】康軒版國語：古文中「諸葛亮誡子書」強調的核心精神為何？", options: ["靜以修身，儉以養德", "金榜題名，光宗耀祖", "及時行樂，享受生活", "出將入相，追求功名"], answer: 0, explain: "誡子書核心在於「靜以修身，儉以養德，非淡泊無以明志」。" },
+                    { id: 'c_m_4', q: "【期中考】「這座山高得彷彿能碰到雲彩」使用了哪一種修辭法？", options: ["夸飾法", "譬喻法", "設問法", "排比法"], answer: 0, explain: "故意言過其實，將山的高聳誇大表達。" },
+                    { id: 'c_m_5', q: "【期中考】下列何者的意思是「做事持之以恆、不半途而廢」？", options: ["堅持不懈", "一鼓作氣", "三心二意", "淺嘗輒止"], answer: 0, explain: "「堅持不懈」指堅定到底，不鬆懈懈怠。" },
+                    { id: 'c_m_6', q: "【期中考】下列「」中的成語，何者使用最為恰當？", options: ["他練習寫字「持之以恆」，終於寫得一手好字", "這道菜的味道真是一敗塗地", "他在球場上表現得繪聲繪影", "這本書讀起來真是五光十色"], answer: 0, explain: "「持之以恆」常用來形容長久堅持做某件事。" },
+                    { id: 'c_m_7', q: "【期中考】「落紅不是無情物，化作春泥更護花」中的「落紅」是指什麼？", options: ["落花", "紅色的葉子", "夕陽", "紅色的布料"], answer: 0, explain: "「落紅」在詩詞中指凋落的花朵。" },
+                    { id: 'c_m_8', q: "【期中考】「這項任務難如登天」使用了哪種修辭法？", options: ["夸飾法", "擬人法", "設問法", "引用法"], answer: 0, explain: "「難如登天」是極度誇張的說法，屬於夸飾法。" },
+                    { id: 'c_m_9', q: "【期中考】下列何者是「水滴石穿」的近義詞？", options: ["繩鋸木斷", "半途而廢", "功虧一潰", "淺嚐輒止"], answer: 0, explain: "「水滴石穿」與「繩鋸木斷」都比喻只要有恆心，再難的事也能成功。" },
+                    { id: 'c_m_10', q: "【期中考】「白日依山盡，黃河入海流」詩中的句型結構屬於哪種修辭？", options: ["對偶法", "設問法", "感嘆法", "頂真法"], answer: 0, explain: "詞性與字數互相對應，屬於對偶法。" }
                 ],
                 final: [
-                    {
-                        q: "【期末考】下列「」中的字音，何者前後完全相同？",
-                        options: ["「強」迫／「強」詞奪理", "「載」歌載舞／千「載」難逢", "「著」名／「著」急", "「數」見不鮮／「數」一數二"],
-                        answer: 0,
-                        explain: "「強」迫 (ㄑㄧㄤˇ) 與「強」詞奪理 (ㄑㄧㄤˇ) 讀音相同。"
-                    },
-                    {
-                        q: "【期末考】「縱使過程艱辛，他（ ）堅持到底不放棄。」括號中應填入何者？",
-                        options: ["依然", "竟然", "未免", "索性"],
-                        answer: 0,
-                        explain: "與「縱使」搭配表示轉折且持續堅持，使用「依然」。"
-                    },
-                    {
-                        q: "【期末考】康軒六上後半冊課文閱讀中，作者常透過抒情文傳達何種深層體悟？",
-                        options: ["感懷歲月與珍惜當下", "追求物質享樂", "抨擊社會不公", "讚賞軍事武功"],
-                        answer: 0,
-                        explain: "課文多強調情感抒發與人生價值的珍惜體悟。"
-                    },
-                    {
-                        q: "【期末考】「光陰似箭，日月如梭」是用來比喻什麼？",
-                        options: ["時間過得極快", "景色十分美麗", "心情非常愉快", "學問非常深厚"],
-                        answer: 0,
-                        explain: "比喻時間飛快流逝。"
-                    },
-                    {
-                        q: "【期末考】下列哪組詞語的意思最為接近？",
-                        options: ["兢兢業業／小心翼翼", "囫圇吞藻／細斟慢酌", "粗製濫造／精雕細琢", "名列前茅／名落孫山"],
-                        answer: 0,
-                        explain: "「兢兢業業」與「小心翼翼」皆有謹慎小心之意。"
-                    }
+                    { id: 'c_f_1', q: "【期末考】下列「」中的字音，何者前後完全相同？", options: ["「強」迫／「強」詞奪理", "「載」歌載舞／千「載」難逢", "「著」名／「著」急", "「數」見不鮮／「數」一數二"], answer: 0, explain: "「強」迫 (ㄑㄧㄤˇ) 與「強」詞奪理 (ㄑㄧㄤˇ) 讀音相同。" },
+                    { id: 'c_f_2', q: "【期末考】「縱使過程艱辛，他（ ）堅持到底不放棄。」括號中應填入何者？", options: ["依然", "竟然", "未免", "索性"], answer: 0, explain: "與「縱使」搭配表示轉折且持續堅持，使用「依然」。" },
+                    { id: 'c_f_3', q: "【期末考】康軒六上後半冊課文閱讀中，作者常透過抒情文傳達何種深層體悟？", options: ["感懷歲月與珍惜當下", "追求物質享樂", "抨擊社會不公", "讚賞軍事武功"], answer: 0, explain: "課文多強調情感抒發與人生價值的珍惜體悟。" },
+                    { id: 'c_f_4', q: "【期末考】「光陰似箭，日月如梭」是用來比喻什麼？", options: ["時間過得極快", "景色十分美麗", "心情非常愉快", "學問非常深厚"], answer: 0, explain: "比喻時間飛快流逝。" },
+                    { id: 'c_f_5', q: "【期末考】下列哪組詞語的意思最為接近？", options: ["兢兢業業／小心翼翼", "囫圇吞藻／細斟慢酌", "粗製濫造／精雕細琢", "名列前茅／名落孫山"], answer: 0, explain: "「兢兢業業」與「小心翼翼」皆有謹慎小心之意。" },
+                    { id: 'c_f_6', q: "【期末考】「這本書讀起來真是趣味盎然。」「盎然」的意思是？", options: ["洋溢、濃厚的樣子", "枯燥無味", "斷斷續續", "隱隱約約"], answer: 0, explain: "「盎然」形容氣氛或興趣非常濃厚的樣子。" },
+                    { id: 'c_f_7', q: "【期末考】下列何者屬於「反問（激問）」的句型？", options: ["難道我們不應該孝順父母嗎？", "你今天幾點上學？", "我不知道他去哪裡了。", "請你快一點過來！"], answer: 0, explain: "「難道我們不應該……嗎？」答案在問題的反面，屬於激問。" }
                 ]
             },
             math: {
                 midterm: [
-                    {
-                        q: "【期中考】若化簡比為 15 : 25，其最簡整數比與比值分別為何？",
-                        options: ["3 : 5，比值為 3/5", "5 : 3，比值為 5/3", "1 : 2，比值為 1/2", "3 : 5，比值為 5/3"],
-                        answer: 0,
-                        explain: "15:25 同除以 5 為 3:5，比值為 3 ÷ 5 = 3/5。"
-                    },
-                    {
-                        q: "【期中考】解方程式：5x + 10 = 35，則 x 的值為多少？",
-                        options: ["5", "6", "7", "8"],
-                        answer: 0,
-                        explain: "5x = 35 - 10 = 25，x = 25 ÷ 5 = 5。"
-                    },
-                    {
-                        q: "【期中考】計算 2/3 ÷ 4/5 的結果應為多少？",
-                        options: ["5/6", "8/15", "10/12", "6/5"],
-                        answer: 0,
-                        explain: "分數除法：乘以倒數，2/3 × 5/4 = 10/12 = 5/6。"
-                    },
-                    {
-                        q: "【期中考】求 12 和 18 的最大公因數是多少？",
-                        options: ["6", "3", "12", "36"],
-                        answer: 0,
-                        explain: "12 與 18 的因數中最大的共同數是 6。"
-                    },
-                    {
-                        q: "【期中考】若 4 : 7 = x : 21，則 x 的值是多少？",
-                        options: ["12", "14", "9", "16"],
-                        answer: 0,
-                        explain: "內項乘積等於外項乘積：7x = 4 × 21 = 84，x = 12。"
-                    },
-                    {
-                        q: "【期中考】將 0.8 化為最簡分數為多少？",
-                        options: ["4/5", "8/10", "2/5", "3/4"],
-                        answer: 0,
-                        explain: "0.8 = 8/10 = 4/5。"
-                    }
+                    { id: 'm_m_1', q: "【期中考】若化簡比為 15 : 25，其最簡整數比與比值分別為何？", options: ["3 : 5，比值為 3/5", "5 : 3，比值為 5/3", "1 : 2，比值為 1/2", "3 : 5，比值為 5/3"], answer: 0, explain: "15:25 同除以 5 為 3:5，比值為 3 ÷ 5 = 3/5。" },
+                    { id: 'm_m_2', q: "【期中考】解方程式：5x + 10 = 35，則 x 的值為多少？", options: ["5", "6", "7", "8"], answer: 0, explain: "5x = 35 - 10 = 25，x = 25 ÷ 5 = 5。" },
+                    { id: 'm_m_3', q: "【期中考】計算 2/3 ÷ 4/5 的結果應為多少？", options: ["5/6", "8/15", "10/12", "6/5"], answer: 0, explain: "分數除法：乘以倒數，2/3 × 5/4 = 10/12 = 5/6。" },
+                    { id: 'm_m_4', q: "【期中考】求 12 和 18 的最大公因數是多少？", options: ["6", "3", "12", "36"], answer: 0, explain: "12 與 18 的因數中最大的共同數是 6。" },
+                    { id: 'm_m_5', q: "【期中考】若 4 : 7 = x : 21，則 x 的值是多少？", options: ["12", "14", "9", "16"], answer: 0, explain: "內項乘積等於外項乘積：7x = 4 × 21 = 84，x = 12。" },
+                    { id: 'm_m_6', q: "【期中考】將 0.8 化為最簡分數為多少？", options: ["4/5", "8/10", "2/5", "3/4"], answer: 0, explain: "0.8 = 8/10 = 4/5。" },
+                    { id: 'm_m_7', q: "【期中考】18 與 24 的最小公倍數是多少？", options: ["72", "48", "36", "144"], answer: 0, explain: "18 與 24 的公倍數中最小的是 72。" },
+                    { id: 'm_m_8', q: "【期中考】一包糖果有 24 顆，分給小明和阿華的比是 3 : 5，小明分到幾顆？", options: ["9 顆", "15 顆", "8 顆", "12 顆"], answer: 0, explain: "總份數為 3+5=8 份，每份 24÷8=3 顆，小明分到 3×3=9 顆。" }
                 ],
                 final: [
-                    {
-                        q: "【期末考】翰林版六上數學：若圓的半徑為 10 公分，則其圓面積約為多少平方公分？(圓周率 3.14)",
-                        options: ["314 平方公分", "62.8 平方公分", "31.4 平方公分", "157 平方公分"],
-                        answer: 0,
-                        explain: "圓面積 = 半徑 × 半徑 × 圓周率 = 10 × 10 × 3.14 = 314。"
-                    },
-                    {
-                        q: "【期末考】小明騎腳踏車 2 小時行駛了 36 公里，請問他的平均時速是多少？",
-                        options: ["18 公里/小時", "36 公里/小時", "72 公里/小時", "12 公里/小時"],
-                        answer: 0,
-                        explain: "速率 = 距離 ÷ 時間 = 36 ÷ 2 = 18 (公里/小時)。"
-                    },
-                    {
-                        q: "【期末考】在一張 1 : 1000 的地圖上，長度 5 公分的道路實際長度是多少公尺？",
-                        options: ["50 公尺", "500 公尺", "5 公尺", "5000 公尺"],
-                        answer: 0,
-                        explain: "5 公分 × 1000 = 5000 公分 = 50 公尺。"
-                    },
-                    {
-                        q: "【期末考】半徑 5 公分的圓，其周長約為多少公分？(圓周率 3.14)",
-                        options: ["31.4 公分", "15.7 公分", "78.5 公分", "62.8 公分"],
-                        answer: 0,
-                        explain: "圓周長 = 直徑 × 圓周率 = 10 × 3.14 = 31.4 公分。"
-                    },
-                    {
-                        q: "【期末考】汽車以每小時 60 公里的速度行駛 2.5 小時，共行駛多少公里？",
-                        options: ["150 公里", "120 公里", "180 公里", "100 公里"],
-                        answer: 0,
-                        explain: "距離 = 速率 × 時間 = 60 × 2.5 = 150 公里。"
-                    }
+                    { id: 'm_f_1', q: "【期末考】翰林版數學：若圓的半徑為 10 公分，則其圓面積約為多少平方公分？(圓周率 3.14)", options: ["314 平方公分", "62.8 平方公分", "31.4 平方公分", "157 平方公分"], answer: 0, explain: "圓面積 = 半徑 × 半徑 × 圓周率 = 10 × 10 × 3.14 = 314。" },
+                    { id: 'm_f_2', q: "【期末考】小明騎腳踏車 2 小時行駛了 36 公里，請問他的平均時速是多少？", options: ["18 公里/小時", "36 公里/小時", "72 公里/小時", "12 公里/小時"], answer: 0, explain: "速率 = 距離 ÷ 時間 = 36 ÷ 2 = 18 (公里/小時)。" },
+                    { id: 'm_f_3', q: "【期末考】在一張 1 : 1000 的地圖上，長度 5 公分的道路實際長度是多少公尺？", options: ["50 公尺", "500 公尺", "5 公尺", "5000 公尺"], answer: 0, explain: "5 公分 × 1000 = 5000 公分 = 50 公尺。" },
+                    { id: 'm_f_4', q: "【期末考】半徑 5 公分的圓，其周長約為多少公分？(圓周率 3.14)", options: ["31.4 公分", "15.7 公分", "78.5 公分", "62.8 公分"], answer: 0, explain: "圓周長 = 直徑 × 圓周率 = 10 × 3.14 = 31.4 公分。" },
+                    { id: 'm_f_5', q: "【期末考】汽車以每小時 60 公里的速度行駛 2.5 小時，共行駛多少公里？", options: ["150 公里", "120 公里", "180 公里", "100 公里"], answer: 0, explain: "距離 = 速率 × 時間 = 60 × 2.5 = 150 公里。" },
+                    { id: 'm_f_6', q: "【期末考】一塊底 12 公分、高 8 公分的平行四邊形放大 3 倍後，面積變成多少平方公分？", options: ["864 平方公分", "288 平方公分", "96 平方公分", "576 平方公分"], answer: 0, explain: "原面積 12×8=96，放大 3 倍長度後，面積放大 3×3=9 倍：96×9=864。" }
                 ]
             },
             science: {
                 midterm: [
-                    {
-                        q: "【期中考】康軒版自然六上：當冷氣團與暖氣團勢力相當、互相僵持時，會形成哪一種鋒面？",
-                        options: ["滯留鋒", "冷鋒", "暖鋒", "囚錮鋒"],
-                        answer: 0,
-                        explain: "冷暖氣團勢力相當、移動緩慢時會形成滯留鋒（如梅雨季節）。"
-                    },
-                    {
-                        q: "【期中考】臺灣冬半季主要受哪一種季風影響，常帶來偏冷與東北部降雨？",
-                        options: ["東北季風", "西南季風", "東南季風", "西北季風"],
-                        answer: 0,
-                        explain: "臺灣冬天受蒙古高壓影響，盛行東北季風。"
-                    },
-                    {
-                        q: "【期中考】氣象預報中的「高氣壓」通常代表天氣狀況如何？",
-                        options: ["晴朗少雲", "陰雨連綿", "暴風雨狂吹", "降雪降霜"],
-                        answer: 0,
-                        explain: "高壓中心氣流下沉，不易形成雲雨，天氣通常較晴朗。"
-                    },
-                    {
-                        q: "【期中考】下列哪一種儀器主要用來測量空氣中的相對濕度？",
-                        options: ["乾濕球濕度計", "百葉箱氣溫計", "雨量計", "風向風速計"],
-                        answer: 0,
-                        explain: "乾濕球濕度計是用來測定空氣濕度的常見儀器。"
-                    }
+                    { id: 's_m_1', q: "【期中考】康軒版自然：當冷氣團與暖氣團勢力相當、互相僵持時，會形成哪一種鋒面？", options: ["滯留鋒", "冷鋒", "暖鋒", "囚錮鋒"], answer: 0, explain: "冷暖氣團勢力相當、移動緩慢時會形成滯留鋒（如梅雨季節）。" },
+                    { id: 's_m_2', q: "【期中考】臺灣冬半季主要受哪一種季風影響，常帶來偏冷與東北部降雨？", options: ["東北季風", "西南季風", "東南季風", "西北季風"], answer: 0, explain: "臺灣冬天受蒙古高壓影響，盛行東北季風。" },
+                    { id: 's_m_3', q: "【期中考】氣象預報中的「高氣壓」通常代表天氣狀況如何？", options: ["晴朗少雲", "陰雨連綿", "暴風雨狂吹", "降雪降霜"], answer: 0, explain: "高壓中心氣流下沉，不易形成雲雨，天氣通常較晴朗。" },
+                    { id: 's_m_4', q: "【期中考】下列哪一種儀器主要用來測量空氣中的相對濕度？", options: ["乾濕球濕度計", "百葉箱氣溫計", "雨量計", "風向風速計"], answer: 0, explain: "乾濕球濕度計是用來測定空氣濕度的常見儀器。" },
+                    { id: 's_m_5', q: "【期中考】颱風通常生成於哪種環境條件下？", options: ["熱帶海洋表面", "高緯度陸地", "溫帶平原", "寒帶冰原"], answer: 0, explain: "颱風需要大量熱帶海洋的高溫水蒸氣作為能量來源。" }
                 ],
                 final: [
-                    {
-                        q: "【期末考】通電的螺線形線圈中插入下列哪一種物質，可以大幅增強其磁力？",
-                        options: ["鐵棒", "銅棒", "木棒", "塑膠棒"],
-                        answer: 0,
-                        explain: "鐵棒易被磁化，可顯著增強電磁鐵的磁場強度。"
-                    },
-                    {
-                        q: "【期末考】下列關於食物網與生態系保育的敘述，何者正確？",
-                        options: ["生物多樣性越高，生態系越穩定", "引進外來種可增加本地生物多樣性", "獵殺頂級掠食者不影響生態平衡", "大量使用農藥不影響土壤"],
-                        answer: 0,
-                        explain: "物種越豐富、食物網越複雜，生態系抵抗力越強。"
-                    },
-                    {
-                        q: "【期末考】改變下列哪一個因素，可以改變電磁鐵磁極的磁極方向？",
-                        options: ["改變電池的正負極方向", "增加電池數量", "增加線圈圈數", "使用更粗的導線"],
-                        answer: 0,
-                        explain: "改變電流方向（顛倒電池正負極）會改變電磁鐵的 N/S 磁極。"
-                    },
-                    {
-                        q: "【期末考】下列何者屬於生態系中的「分解者」？",
-                        options: ["蕈類與真菌", "綠色植物", "草食性昆蟲", "肉食性動物"],
-                        answer: 0,
-                        explain: "真菌與細菌能分解動植物屍體與排泄物，屬於分解者。"
-                    }
+                    { id: 's_f_1', q: "【期末考】通電的螺線形線圈中插入下列哪一種物質，可以大幅增強其磁力？", options: ["鐵棒", "銅棒", "木棒", "塑膠棒"], answer: 0, explain: "鐵棒易被磁化，可顯著增強電磁鐵的磁場強度。" },
+                    { id: 's_f_2', q: "【期末考】下列關於食物網與生態系保育的敘述，何者正確？", options: ["生物多樣性越高，生態系越穩定", "引進外來種可增加本地生物多樣性", "獵殺頂級掠食者不影響生態平衡", "大量使用農藥不影響土壤"], answer: 0, explain: "物種越豐富、食物網越複雜，生態系抵抗力越強。" },
+                    { id: 's_f_3', q: "【期末考】改變下列哪一個因素，可以改變電磁鐵磁極的磁極方向？", options: ["改變電池的正負極方向", "增加電池數量", "增加線圈圈數", "使用更粗的導線"], answer: 0, explain: "改變電流方向（顛倒電池正負極）會改變電磁鐵的 N/S 磁極。" },
+                    { id: 's_f_4', q: "【期末考】下列何者屬於生態系中的「分解者」？", options: ["蕈類與真菌", "綠色植物", "草食性昆蟲", "肉食性動物"], answer: 0, explain: "真菌與細菌能分解動植物屍體與排泄物，屬於分解者。" },
+                    { id: 's_f_5', q: "【期末考】下列何者是臺灣特有的珍貴保育類動物？", options: ["臺灣黑熊", "非洲獅", "無尾熊", "袋鼠"], answer: 0, explain: "臺灣黑熊是臺灣特有的珍貴瀕危保育類動物。" }
                 ]
             },
             social: {
                 midterm: [
-                    {
-                        q: "【期中考】臺灣地形豐富多樣，中央山脈主要呈現何種走向？",
-                        options: ["南北走向", "東西走向", "東北—西南走向", "西北—東南走向"],
-                        answer: 0,
-                        explain: "臺灣造山運動形成東北至西南／南北走向之山脈結構。"
-                    },
-                    {
-                        q: "【期中考】台灣的新竹科學園區以哪一項產業聞名全球？",
-                        options: ["半導體與高科技產業", "重工業與造船", "傳統紡織業", "農業加工"],
-                        answer: 0,
-                        explain: "新竹科學園區是台灣半導體與高科技產業的重要重鎮。"
-                    },
-                    {
-                        q: "【期中考】下列何者是台灣平原地形中面積最大、農業最發達的平原？",
-                        options: ["嘉南平原", "屏東平原", "宜蘭平原", "彰化平原"],
-                        answer: 0,
-                        explain: "嘉南平原是台灣面積最大的平原，為重要穀倉。"
-                    }
+                    { id: 'so_m_1', q: "【期中考】臺灣地形豐富多樣，中央山脈主要呈現何種走向？", options: ["南北走向", "東西走向", "東北—西南走向", "西北—東南走向"], answer: 0, explain: "臺灣造山運動形成東北至西南／南北走向之山脈結構。" },
+                    { id: 'so_m_2', q: "【期中考】台灣的新竹科學園區以哪一項產業聞名全球？", options: ["半導體與高科技產業", "重工業與造船", "傳統紡織業", "農業加工"], answer: 0, explain: "新竹科學園區是台灣半導體與高科技產業的重要重鎮。" },
+                    { id: 'so_m_3', q: "【期中考】下列何者是台灣平原地形中面積最大、農業最發達的平原？", options: ["嘉南平原", "屏東平原", "宜蘭平原", "彰化平原"], answer: 0, explain: "嘉南平原是台灣面積最大的平原，為重要穀倉。" },
+                    { id: 'so_m_4', q: "【期中考】新竹舊社國小附近的「頭前溪」屬於何種水文系統？", options: ["河流", "湖泊", "水庫", "潟湖"], answer: 0, explain: "頭前溪是新竹地區主要的發源河流。" }
                 ],
                 final: [
-                    {
-                        q: "【期末考】翰林版社會六上：總部設於美國紐約，旨在維護世界和平與安全的國際組織是？",
-                        options: ["聯合國 (UN)", "世界貿易組織 (WTO)", "亞太經濟合作會議 (APEC)", "國際紅十字會"],
-                        answer: 0,
-                        explain: "聯合國 (United Nations) 是維護全球和平安全的主要國際組織。"
-                    },
-                    {
-                        q: "【期末考】全球化趨勢下，各國經濟與文化交流日益頻繁，這種現象稱為？",
-                        options: ["地球村", "閉關自守", "地方化", "孤立主義"],
-                        answer: 0,
-                        explain: "交通與通訊發達使全球連結密切，宛如住在同一個地球村。"
-                    },
-                    {
-                        q: "【期末考】旨在推動全球貿易自由化與減少關稅障礙的國際組織是？",
-                        options: ["世界貿易組織 (WTO)", "聯合國 (UN)", "國際奧委會 (IOC)", "綠色和平組織"],
-                        answer: 0,
-                        explain: "WTO 致力於促進全球貿易開放與解決貿易爭端。"
-                    }
+                    { id: 'so_f_1', q: "【期末考】翰林版社會：總部設於美國紐約，旨在維護世界和平與安全的國際組織是？", options: ["聯合國 (UN)", "世界貿易組織 (WTO)", "亞太經濟合作會議 (APEC)", "國際紅十字會"], answer: 0, explain: "聯合國 (United Nations) 是維護全球和平安全的主要國際組織。" },
+                    { id: 'so_f_2', q: "【期末考】全球化趨勢下，各國經濟與文化交流日益頻繁，這種現象稱為？", options: ["地球村", "閉關自守", "地方化", "孤立主義"], answer: 0, explain: "交通與通訊發達使全球連結密切，宛如住在同一個地球村。" },
+                    { id: 'so_f_3', q: "【期末考】旨在推動全球貿易自由化與減少關稅障礙的國際組織是？", options: ["世界貿易組織 (WTO)", "聯合國 (UN)", "國際奧委會 (IOC)", "綠色和平組織"], answer: 0, explain: "WTO 致力於促進全球貿易開放與解決貿易爭端。" },
+                    { id: 'so_f_4', q: "【期末考】面對全球溫室效應，各國簽署的何種公約旨在限制溫室氣體排放？", options: ["巴黎氣候協定", "日內瓦公約", "華盛頓條約", "馬斯垂克條約"], answer: 0, explain: "巴黎協定是全球應對氣候變遷最重要的公約。" }
                 ]
             },
             english: {
                 midterm: [
-                    {
-                        q: "【Midterm】Choose the correct past tense: 'Yesterday, Kevin _____ his homework before playing games.'",
-                        options: ["finished", "finishes", "finish", "is finishing"],
-                        answer: 0,
-                        explain: "Yesterday 時間詞表示過去發生的動作，動詞要用過去式 finished。"
-                    },
-                    {
-                        q: "【Midterm】Complete the sentence: 'A: Where _____ you go last weekend? B: I went to Hsinchu.'",
-                        options: ["did", "do", "are", "were"],
-                        answer: 0,
-                        explain: "詢問過去發生的事情，助動詞使用 did。"
-                    },
-                    {
-                        q: "【Midterm】'My sister _____ to the library every Saturday.' Which form is correct?",
-                        options: ["goes", "go", "went", "is going"],
-                        answer: 0,
-                        explain: "every Saturday 表示習慣性動作，第三人稱單數使用 goes。"
-                    }
+                    { id: 'e_m_1', q: "【Midterm】Choose the correct past tense: 'Yesterday, Kevin _____ his homework before playing games.'", options: ["finished", "finishes", "finish", "is finishing"], answer: 0, explain: "Yesterday 時間詞表示過去發生的動作，動詞要用過去式 finished。" },
+                    { id: 'e_m_2', q: "【Midterm】Complete the sentence: 'A: Where _____ you go last weekend? B: I went to Hsinchu.'", options: ["did", "do", "are", "were"], answer: 0, explain: "詢問過去發生的事情，助動詞使用 did。" },
+                    { id: 'e_m_3', q: "【Midterm】'My sister _____ to the library every Saturday.' Which form is correct?", options: ["goes", "go", "went", "is going"], answer: 0, explain: "every Saturday 表示習慣性動作，第三人稱單數使用 goes。" },
+                    { id: 'e_m_4', q: "【Midterm】'They _____ a movie at the theater two days ago.'", options: ["watched", "watch", "are watching", "will watch"], answer: 0, explain: "two days ago 表示過去的時間，故動詞使用 watched。" }
                 ],
                 final: [
-                    {
-                        q: "【Final】Which one is the superlative form? 'Mount Everest is the _____ mountain in the world.'",
-                        options: ["highest", "higher", "high", "more high"],
-                        answer: 0,
-                        explain: "最高級使用 the highest。"
-                    },
-                    {
-                        q: "【Final】Select the correct word: 'Look! The students _____ basketball on the playground now.'",
-                        options: ["are playing", "played", "play", "plays"],
-                        answer: 0,
-                        explain: "提示詞 Look! 與 now 表示現在進行式 (be + V-ing)。"
-                    },
-                    {
-                        q: "【Final】'This box is _____ than that one.' Fill in the blank.",
-                        options: ["heavier", "heaviest", "heavy", "more heavy"],
-                        answer: 0,
-                        explain: "與 than 搭配使用比較級，heavy 的比較級為 heavier。"
-                    }
+                    { id: 'e_f_1', q: "【Final】Which one is the superlative form? 'Mount Everest is the _____ mountain in the world.'", options: ["highest", "higher", "high", "more high"], answer: 0, explain: "最高級使用 the highest。" },
+                    { id: 'e_f_2', q: "【Final】Select the correct word: 'Look! The students _____ basketball on the playground now.'", options: ["are playing", "played", "play", "plays"], answer: 0, explain: "提示詞 Look! 與 now 表示現在進行式 (be + V-ing)。" },
+                    { id: 'e_f_3', q: "【Final】'This box is _____ than that one.' Fill in the blank.", options: ["heavier", "heaviest", "heavy", "more heavy"], answer: 0, explain: "與 than 搭配使用比較級，heavy 的比較級為 heavier。" },
+                    { id: 'e_f_4', q: "【Final】'She is the _____ girl in our class.'", options: ["smartest", "smarter", "smart", "more smart"], answer: 0, explain: "最高級用 the smartest。" }
                 ]
             }
         };
 
-        /* ==================== CORE NAVIGATION & UI ==================== */
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.nav-tab').forEach(btn => {
-                btn.className = 'nav-tab flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-600 hover:bg-white/80';
-            });
-
-            const activeContent = document.getElementById(`tab-content-${tabId}`);
-            if (activeContent) activeContent.classList.remove('hidden');
-
-            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-            if (activeBtn) {
-                activeBtn.className = 'nav-tab flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-sky-500 text-white shadow-lg shadow-sky-200';
-            }
-
-            if (tabId === 'leaderboard') renderLeaderboard();
-            if (tabId === 'students') renderStudentsGrid();
-        }
-
-        function selectSubject(subjKey) {
-            currentSubject = subjKey;
-            document.querySelectorAll('.subject-card').forEach(card => {
-                card.classList.remove('ring-4', 'ring-sky-400', 'shadow-xl');
-            });
-            const activeCard = document.getElementById(`subj-${subjKey}`);
-            if (activeCard) {
-                activeCard.classList.add('ring-4', 'ring-sky-400', 'shadow-xl');
-            }
-        }
-
-        function setDifficulty(diff) {
-            currentDifficulty = diff;
-            document.querySelectorAll('.diff-btn').forEach(btn => {
-                btn.classList.remove('border-emerald-400', 'bg-emerald-50', 'text-emerald-800', 'border-amber-400', 'bg-amber-50', 'text-amber-800', 'border-rose-400', 'bg-rose-50', 'text-rose-800');
-                btn.classList.add('border-slate-200', 'bg-white', 'text-slate-600');
-            });
-
-            const activeBtn = document.getElementById(`diff-${diff}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('border-slate-200', 'bg-white', 'text-slate-600');
-                if (diff === 'easy') activeBtn.classList.add('border-emerald-400', 'bg-emerald-50', 'text-emerald-800');
-                if (diff === 'medium') activeBtn.classList.add('border-amber-400', 'bg-amber-50', 'text-amber-800');
-                if (diff === 'hard') activeBtn.classList.add('border-rose-400', 'bg-rose-50', 'text-rose-800');
-            }
-        }
-
-        function setScope(scope) {
-            currentExamScope = scope;
-            document.querySelectorAll('.scope-btn').forEach(btn => {
-                btn.classList.remove('border-sky-400', 'bg-sky-50', 'text-sky-800', 'border-indigo-400', 'bg-indigo-50', 'text-indigo-800');
-                btn.classList.add('border-slate-200', 'bg-white', 'text-slate-600');
-            });
-
-            const activeBtn = document.getElementById(`scope-${scope}`);
-            if (activeBtn) {
-                activeBtn.classList.remove('border-slate-200', 'bg-white', 'text-slate-600');
-                if (scope === 'midterm') activeBtn.classList.add('border-sky-400', 'bg-sky-50', 'text-sky-800');
-                if (scope === 'final') activeBtn.classList.add('border-indigo-400', 'bg-indigo-50', 'text-indigo-800');
-            }
-        }
-
-        /* ==================== DATA & STORAGE LOGIC ==================== */
-        function loadData() {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                try {
-                    appData = JSON.parse(raw);
-                } catch(e) {
-                    console.error("Storage parse error", e);
-                }
-            }
-            if (!appData.students || appData.students.length === 0) {
-                initDefaultStudents();
-            } else {
-                renderActiveStudentBar();
-            }
-        }
-
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-            renderActiveStudentBar();
-            renderStudentsGrid();
-        }
-
-        function initDefaultStudents() {
-            const defaults = ["王小明", "陳品妍", "林宇翔", "張千羽"];
-            defaults.forEach((name, idx) => {
-                appData.students.push({
-                    id: 'std_' + Date.now() + '_' + idx,
-                    name: name,
-                    exp: (3 - idx) * 40,
-                    coins: (3 - idx) * 20,
-                    level: 1,
-                    midtermScore: (3 - idx) * 15,
-                    finalScore: (3 - idx) * 10,
-                    badges: ["新手上路"]
-                });
-            });
-            appData.activeStudentId = appData.students[0].id;
-            saveData();
-        }
-
-        function getActiveStudent() {
-            return appData.students.find(s => s.id === appData.activeStudentId) || appData.students[0];
-        }
-
-        function setActiveStudent(id) {
-            appData.activeStudentId = id;
-            saveData();
-            showToast(`已切換目前闖關者為：${getActiveStudent()?.name}`);
-        }
-
-        function renderActiveStudentBar() {
-            const bar = document.getElementById('active-student-bar');
-            const student = getActiveStudent();
-            if (!student) {
-                bar.innerHTML = `<span class="text-xs font-bold text-slate-500">請新增學生</span>`;
-                return;
-            }
-
-            const titleIndex = Math.min(student.level - 1, LEVEL_TITLES.length - 1);
-            bar.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-full bg-sky-500 text-white font-bold text-xs flex items-center justify-center">
-                        ${student.name.charAt(0)}
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-bold text-slate-800 text-xs sm:text-sm">${student.name}</span>
-                            <span class="text-[10px] bg-amber-400 text-amber-950 font-extrabold px-1.5 rounded-full">Lvl.${student.level}</span>
-                        </div>
-                        <p class="text-[10px] text-sky-700 font-medium">${LEVEL_TITLES[titleIndex]} (${student.exp} EXP)</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderStudentsGrid() {
-            const container = document.getElementById('students-grid-container');
-            const badgeCount = document.getElementById('student-count-badge');
-            if (badgeCount) badgeCount.innerText = `共 ${appData.students.length} 位學生`;
-
-            container.innerHTML = '';
-            appData.students.forEach(s => {
-                const isActive = s.id === appData.activeStudentId;
-                const card = document.createElement('div');
-                card.className = `p-4 rounded-2xl border-2 transition-all flex flex-col justify-between ${
-                    isActive ? 'border-sky-400 bg-sky-50/50 shadow-md' : 'border-slate-100 bg-white hover:border-slate-200'
-                }`;
-
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold text-sm flex items-center justify-center">
-                                    ${s.name.charAt(0)}
-                                </div>
-                                <div>
-                                    <h4 class="font-bold text-slate-800 text-sm">${s.name}</h4>
-                                    <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">Level ${s.level}</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                ${
-                                    isActive 
-                                    ? `<span class="text-[10px] bg-sky-500 text-white font-bold px-2 py-0.5 rounded-full">當前遊玩</span>` 
-                                    : `<button onclick="setActiveStudent('${s.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1 rounded-lg">選擇</button>`
-                                }
-                                <button onclick="deleteStudent('${s.id}')" class="text-xs text-rose-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-50 transition-colors" title="刪除學生">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2 rounded-xl my-2">
-                            <div><span class="text-slate-400">EXP：</span><b class="text-amber-600">${s.exp}</b></div>
-                            <div><span class="text-slate-400">點數：</span><b class="text-indigo-600">${s.coins}</b></div>
-                            <div><span class="text-slate-400">期中：</span><b class="text-sky-600">${s.midtermScore || 0}分</b></div>
-                            <div><span class="text-slate-400">期末：</span><b class="text-emerald-600">${s.finalScore || 0}分</b></div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1 overflow-x-auto pt-1">
-                        ${(s.badges || []).map(b => `<span class="text-[10px] bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-full whitespace-nowrap">🏅 ${b}</span>`).join('')}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function deleteStudent(id) {
-            const student = appData.students.find(s => s.id === id);
-            if (!student) return;
-
-            if (confirm(`確定要刪除學生「${student.name}」嗎？刪除後學習紀錄將無法復原。`)) {
-                appData.students = appData.students.filter(s => s.id !== id);
-                if (appData.activeStudentId === id) {
-                    appData.activeStudentId = appData.students.length > 0 ? appData.students[0].id : null;
-                }
-                saveData();
-                showToast(`已成功刪除學生：${student.name}`);
-            }
-        }
-
-        function handleBatchAddStudents() {
-            const input = document.getElementById('batch-student-input');
-            const rawText = input.value.trim();
-            if (!rawText) {
-                showToast("請輸入學生姓名名單！");
-                return;
-            }
-
-            const names = rawText.split(/[\n,，\s]+/).filter(n => n.trim().length > 0);
-            let addedCount = 0;
-
-            names.forEach(name => {
-                const cleanName = name.trim();
-                if (!appData.students.some(s => s.name === cleanName)) {
-                    appData.students.push({
-                        id: 'std_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                        name: cleanName,
-                        exp: 0,
-                        coins: 0,
-                        level: 1,
-                        midtermScore: 0,
-                        finalScore: 0,
-                        badges: ["新手上路"]
-                    });
-                    addedCount++;
-                }
-            });
-
-            if (!appData.activeStudentId && appData.students.length > 0) {
-                appData.activeStudentId = appData.students[0].id;
-            }
-
-            saveData();
-            input.value = '';
-            showToast(`成功匯入 ${addedCount} 位新學生！`);
-        }
-
-        /* ==================== LEADERBOARD LOGIC ==================== */
-        function sortLeaderboard(sortType) {
-            currentSort = sortType;
-            document.querySelectorAll('#sort-exp-btn, #sort-midterm-btn, #sort-final-btn').forEach(btn => {
-                btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-800';
-            });
-
-            const activeBtn = document.getElementById(`sort-${sortType}-btn`);
-            if (activeBtn) activeBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-sky-600 shadow-sm';
-
-            renderLeaderboard();
-        }
-
-        function renderLeaderboard() {
-            const list = document.getElementById('leaderboard-list');
-            if (!list) return;
-
-            let sorted = [...appData.students];
-            if (currentSort === 'exp') sorted.sort((a,b) => b.exp - a.exp);
-            if (currentSort === 'midterm') sorted.sort((a,b) => (b.midtermScore || 0) - (a.midtermScore || 0));
-            if (currentSort === 'final') sorted.sort((a,b) => (b.finalScore || 0) - (a.finalScore || 0));
-
-            list.innerHTML = '';
-            sorted.forEach((std, rank) => {
-                let rankBadge = `<span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">${rank + 1}</span>`;
-                if (rank === 0) rankBadge = `<span class="w-7 h-7 rounded-full bg-amber-400 text-amber-950 font-extrabold text-sm flex items-center justify-center shadow-md">🥇</span>`;
-                if (rank === 1) rankBadge = `<span class="w-7 h-7 rounded-full bg-slate-300 text-slate-800 font-extrabold text-sm flex items-center justify-center shadow-md">🥈</span>`;
-                if (rank === 2) rankBadge = `<span class="w-7 h-7 rounded-full bg-amber-600 text-white font-extrabold text-sm flex items-center justify-center shadow-md">🥉</span>`;
-
-                const row = document.createElement('div');
-                row.className = 'flex items-center justify-between p-3.5 bg-slate-50 hover:bg-sky-50/60 rounded-2xl border border-slate-100 transition-colors';
-                
-                let scoreDisplay = `<span class="font-bold text-amber-600 text-sm">${std.exp} <span class="text-[10px] text-slate-400">EXP</span></span>`;
-                if (currentSort === 'midterm') scoreDisplay = `<span class="font-bold text-sky-600 text-sm">${std.midtermScore || 0} <span class="text-[10px] text-slate-400">期中分</span></span>`;
-                if (currentSort === 'final') scoreDisplay = `<span class="font-bold text-indigo-600 text-sm">${std.finalScore || 0} <span class="text-[10px] text-slate-400">期末分</span></span>`;
-
-                row.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        ${rankBadge}
-                        <div class="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold text-xs flex items-center justify-center">
-                            ${std.name.charAt(0)}
-                        </div>
-                        <div>
-                            <span class="font-bold text-slate-800 text-sm">${std.name}</span>
-                            <span class="ml-2 text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">Lvl.${std.level}</span>
-                        </div>
-                    </div>
-                    <div>${scoreDisplay}</div>
-                `;
-                list.appendChild(row);
-            });
-        }
-
-        /* ==================== QUIZ GAME ENGINE ==================== */
+        /* ==================== IMPROVED QUIZ DRAWING ENGINE ==================== */
         function shuffleArray(array) {
             const arr = [...array];
             for (let i = arr.length - 1; i > 0; i--) {
@@ -1154,13 +668,31 @@
 
             let combinedPool = [...rawBuiltIn, ...customForSubj];
             if (combinedPool.length === 0) {
-                showToast("該科目目前尚無此考試範圍的題目，已載入備用題目！");
+                showToast("該科目目前尚無此考試範圍的題目，已載入國語期中題庫！");
                 combinedPool = builtInQuestions.chinese.midterm;
             }
 
-            const shuffledPool = shuffleArray(combinedPool);
+            // 防重複邏輯：過濾掉近期已經出過的題目 ID
+            if (!appData.askedQuestionIds) appData.askedQuestionIds = [];
+            let unaskedPool = combinedPool.filter(q => !appData.askedQuestionIds.includes(q.id));
+
+            // 如果未答過的題目不夠 5 題，清空記憶重新洗牌
+            if (unaskedPool.length < 5) {
+                appData.askedQuestionIds = [];
+                unaskedPool = [...combinedPool];
+            }
+
+            // 打散隨機抽出 5 題
+            const shuffledPool = shuffleArray(unaskedPool);
             const selectedRawQuestions = shuffledPool.slice(0, 5);
 
+            // 記錄本次抽出的題目 ID 避免下次又抽到
+            selectedRawQuestions.forEach(q => {
+                if (q.id) appData.askedQuestionIds.push(q.id);
+            });
+            saveData();
+
+            // 題目選項也進行隨機混洗打散，避免答案位置固定
             activeQuizQuestions = selectedRawQuestions.map(qObj => {
                 const originalOptions = qObj.options.map((optText, idx) => ({
                     text: optText,
